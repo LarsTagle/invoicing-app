@@ -5,6 +5,7 @@ node_modules/
 
 # Expo
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
@@ -35,3 +36,14 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Android/iOS folders (not in pure Expo)
+android/
+ios/
+
+# VSCode settings (optional)
+.vscode/
+
+# SQLite DB file if you store it locally
+*.db
+*.sqlite
