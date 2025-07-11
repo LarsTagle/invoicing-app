@@ -5,10 +5,7 @@ const dbName = "invoice.db";
 
 // Initialize the database
 export async function initializeDatabase() {
-  const db = await SQLite.openDatabaseAsync(dbName, {
-    useNewConnection: false,
-  });
-
+  const db = await SQLite.openDatabaseAsync(dbName);
   try {
     // Create invoices table
     await db.execAsync(`
@@ -16,6 +13,7 @@ export async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS invoices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         client TEXT NOT NULL,
+        issue_date TEXT NOT NULL,
         due_date TEXT NOT NULL,
         total REAL NOT NULL,
         status TEXT NOT NULL
@@ -35,65 +33,86 @@ export async function initializeDatabase() {
     `);
 
     console.log("Database initialized successfully");
-    return db;
   } catch (error) {
     console.error("Error initializing database:", error);
     throw error;
+  } finally {
+    await db.closeAsync();
   }
 }
 
 // Insert a new invoice
-export async function insertInvoice(client, due_date, total, status) {
-  const db = await SQLite.openDatabaseAsync(dbName, {
-    useNewConnection: false,
-  });
+export async function insertInvoice(
+  client,
+  issue_date,
+  due_date,
+  total,
+  status
+) {
+  const db = await SQLite.openDatabaseAsync(dbName);
   try {
+    // Validate parameters
+    if (!client || !issue_date || !due_date || total == null || !status) {
+      throw new Error(
+        `Invalid invoice parameters: client=${client}, issue_date=${issue_date}, due_date=${due_date}, total=${total}, status=${status}`
+      );
+    }
+
+    console.log("Inserting invoice with values:", {
+      client,
+      issue_date,
+      due_date,
+      total: Number(total),
+      status,
+    });
+
     const result = await db.runAsync(
-      `INSERT INTO invoices (client, due_date, total, status) VALUES (?, ?, ?, ?);`,
-      [client, due_date, total, status]
+      `INSERT INTO invoices (client, issue_date, due_date, total, status) VALUES (?, ?, ?, ?, ?);`,
+      [client, issue_date, due_date, Number(total), status]
     );
     return result.lastInsertRowId;
   } catch (error) {
     console.error("Error inserting invoice:", error);
     throw error;
+  } finally {
+    await db.closeAsync();
   }
 }
 
 // Insert an item for an invoice
 export async function insertItem(invoice_id, name, quantity, price) {
-  const db = await SQLite.openDatabaseAsync(dbName, {
-    useNewConnection: false,
-  });
+  const db = await SQLite.openDatabaseAsync(dbName);
   try {
     await db.runAsync(
       `INSERT INTO items (invoice_id, name, quantity, price) VALUES (?, ?, ?, ?);`,
-      [invoice_id, name, quantity, price]
+      [invoice_id, name, Number(quantity), Number(price)]
     );
   } catch (error) {
     console.error("Error inserting item:", error);
     throw error;
+  } finally {
+    await db.closeAsync();
   }
 }
 
 // Fetch all invoices
 export async function getInvoices() {
-  const db = await SQLite.openDatabaseAsync(dbName, {
-    useNewConnection: false,
-  });
+  const db = await SQLite.openDatabaseAsync(dbName);
   try {
     const invoices = await db.getAllAsync(`SELECT * FROM invoices;`);
+    console.log("Fetched invoices:", invoices);
     return invoices;
   } catch (error) {
     console.error("Error fetching invoices:", error);
     throw error;
+  } finally {
+    await db.closeAsync();
   }
 }
 
 // Fetch items for a specific invoice
 export async function getItemsByInvoiceId(invoice_id) {
-  const db = await SQLite.openDatabaseAsync(dbName, {
-    useNewConnection: false,
-  });
+  const db = await SQLite.openDatabaseAsync(dbName);
   try {
     const items = await db.getAllAsync(
       `SELECT * FROM items WHERE invoice_id = ?;`,
@@ -103,14 +122,14 @@ export async function getItemsByInvoiceId(invoice_id) {
   } catch (error) {
     console.error("Error fetching items:", error);
     throw error;
+  } finally {
+    await db.closeAsync();
   }
 }
 
 // Update invoice status
 export async function updateInvoiceStatus(id, status) {
-  const db = await SQLite.openDatabaseAsync(dbName, {
-    useNewConnection: false,
-  });
+  const db = await SQLite.openDatabaseAsync(dbName);
   try {
     await db.runAsync(`UPDATE invoices SET status = ? WHERE id = ?;`, [
       status,
@@ -119,5 +138,7 @@ export async function updateInvoiceStatus(id, status) {
   } catch (error) {
     console.error("Error updating invoice status:", error);
     throw error;
+  } finally {
+    await db.closeAsync();
   }
 }
