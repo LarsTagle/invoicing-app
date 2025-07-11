@@ -61,13 +61,22 @@ export default function InvoiceFormScreen({ navigation }) {
     }
 
     try {
+      // Log parameters before inserting
+      console.log("Submitting invoice:", {
+        client,
+        issue_date: issueDate.toISOString(),
+        due_date: dueDate.toISOString(),
+        total,
+        status: "Unpaid",
+      });
+
       // Insert invoice into database
       const invoiceId = await insertInvoice(
         client,
         issueDate.toISOString(),
         dueDate.toISOString(),
         total,
-        "unpaid"
+        "Unpaid"
       );
 
       // Insert items into database
@@ -79,6 +88,7 @@ export default function InvoiceFormScreen({ navigation }) {
       navigation.navigate("InvoiceList");
     } catch (error) {
       Alert.alert("Error", "Failed to create invoice. Please try again.");
+      console.error("Submit error:", error);
     }
   };
 
