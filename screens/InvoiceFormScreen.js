@@ -53,6 +53,19 @@ export default function InvoiceFormScreen({ navigation }) {
     setItemPrice("");
   };
 
+  // Clear form state
+  const clearForm = () => {
+    setClient("");
+    setIssueDate(new Date());
+    setDueDate(new Date());
+    setItems([]);
+    setItemName("");
+    setItemQuantity("");
+    setItemPrice("");
+    setShowIssueDatePicker(false);
+    setShowDueDatePicker(false);
+  };
+
   // Submit invoice
   const handleSubmit = async () => {
     if (!client || items.length === 0) {
@@ -85,6 +98,7 @@ export default function InvoiceFormScreen({ navigation }) {
       }
 
       Alert.alert("Success", "Invoice created successfully!");
+      clearForm(); // Clear the form after successful submission
       navigation.navigate("InvoiceList");
     } catch (error) {
       Alert.alert("Error", "Failed to create invoice. Please try again.");
