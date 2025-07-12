@@ -7,12 +7,14 @@ import {
   RefreshControl,
   TouchableOpacity,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import InvoiceItemCard from "../components/InvoiceItemCard";
 import { getInvoices } from "../database/db";
 
 export default function InvoiceListScreen({ navigation }) {
   const [invoices, setInvoices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [sortField, setSortField] = useState("id"); // Default sort by invoice number
 
   // Fetch invoices from the database
   const fetchInvoices = async () => {
@@ -40,6 +42,26 @@ export default function InvoiceListScreen({ navigation }) {
     fetchInvoices();
   }, []);
 
+  // Sort invoices based on selected field
+  const sortedInvoices = [...invoices].sort((a, b) => {
+    switch (sortField) {
+      case "id":
+        return a.id - b.id; // Numeric sort for invoice number
+      case "client":
+        const nameA = `${a.first_name} ${a.last_name}`.toLowerCase();
+        const nameB = `${b.first_name} ${b.last_name}`.toLowerCase();
+        return nameA.localeCompare(nameB); // Alphabetical sort for client name
+      case "status":
+        return a.status.localeCompare(b.status); // Alphabetical sort for status
+      case "due_date":
+        return new Date(a.due_date) - new Date(b.due_date); // Date sort
+      case "total":
+        return a.total - b.total; // Numeric sort for total
+      default:
+        return a.id - b.id; // Fallback to invoice number
+    }
+  });
+
   // Render empty state
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
@@ -58,18 +80,36 @@ export default function InvoiceListScreen({ navigation }) {
           <Text style={styles.createButtonText}>Create</Text>
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={invoices}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <InvoiceItemCard invoice={item} onStatusUpdate={fetchInvoices} />
+      <View style={styles.body}>
+        {invoices.length > 0 && (
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={sortField}
+              style={styles.picker}
+              onValueChange={(itemValue) => setSortField(itemValue)}
+              itemStyle={styles.pickerItem}
+            >
+              <Picker.Item label="Sort by Invoice Number" value="id" />
+              <Picker.Item label="Sort by Client Name" value="client" />
+              <Picker.Item label="Sort by Status" value="status" />
+              <Picker.Item label="Sort by Due Date" value="due_date" />
+              <Picker.Item label="Sort by Total" value="total" />
+            </Picker>
+          </View>
         )}
-        ListEmptyComponent={renderEmptyState}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={styles.listContent}
-      />
+        <FlatList
+          data={sortedInvoices}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <InvoiceItemCard invoice={item} onStatusUpdate={fetchInvoices} />
+          )}
+          ListEmptyComponent={renderEmptyState}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          contentContainerStyle={styles.listContent}
+        />
+      </View>
     </View>
   );
 }
@@ -105,8 +145,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  body: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  pickerContainer: {
+    backgroundColor: "#fff", // White background for picker container
+    borderWidth: 1,
+    borderColor: "#000", // Thin black border
+    borderRadius: 4,
+    marginBottom: 10,
+    marginTop: 10,
+    width: 200, // Fixed width to make it smaller
+  },
+  picker: {
+    width: "100%",
+  },
+  pickerItem: {
+    fontSize: 14, // Ensure text is visible and readable
+  },
   listContent: {
-    padding: 16,
+    paddingBottom: 16,
   },
   emptyContainer: {
     flex: 1,
