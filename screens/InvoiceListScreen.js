@@ -15,6 +15,7 @@ export default function InvoiceListScreen({ navigation }) {
   const [invoices, setInvoices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [sortField, setSortField] = useState("id"); // Default sort by invoice number
+  const [statusFilter, setStatusFilter] = useState("All"); // Default to show all invoices
 
   // Fetch invoices from the database
   const fetchInvoices = async () => {
@@ -42,8 +43,19 @@ export default function InvoiceListScreen({ navigation }) {
     fetchInvoices();
   }, []);
 
-  // Sort invoices based on selected field
-  const sortedInvoices = [...invoices].sort((a, b) => {
+  // Toggle status filter between All, Paid, and Unpaid
+  const toggleStatusFilter = () => {
+    setStatusFilter((prev) =>
+      prev === "All" ? "Paid" : prev === "Paid" ? "Unpaid" : "All"
+    );
+  };
+
+  // Filter and sort invoices
+  const filteredInvoices = invoices.filter((invoice) =>
+    statusFilter === "All" ? true : invoice.status === statusFilter
+  );
+
+  const sortedInvoices = [...filteredInvoices].sort((a, b) => {
     switch (sortField) {
       case "id":
         return a.id - b.id; // Numeric sort for invoice number
@@ -82,19 +94,27 @@ export default function InvoiceListScreen({ navigation }) {
       </View>
       <View style={styles.body}>
         {invoices.length > 0 && (
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={sortField}
-              style={styles.picker}
-              onValueChange={(itemValue) => setSortField(itemValue)}
-              itemStyle={styles.pickerItem}
+          <View style={styles.controlsContainer}>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={sortField}
+                style={styles.picker}
+                onValueChange={(itemValue) => setSortField(itemValue)}
+                itemStyle={styles.pickerItem}
+              >
+                <Picker.Item label="Sort by Invoice Number" value="id" />
+                <Picker.Item label="Sort by Client Name" value="client" />
+                <Picker.Item label="Sort by Status" value="status" />
+                <Picker.Item label="Sort by Due Date" value="due_date" />
+                <Picker.Item label="Sort by Total" value="total" />
+              </Picker>
+            </View>
+            <TouchableOpacity
+              style={styles.statusButton}
+              onPress={toggleStatusFilter}
             >
-              <Picker.Item label="Sort by Invoice Number" value="id" />
-              <Picker.Item label="Sort by Client Name" value="client" />
-              <Picker.Item label="Sort by Status" value="status" />
-              <Picker.Item label="Sort by Due Date" value="due_date" />
-              <Picker.Item label="Sort by Total" value="total" />
-            </Picker>
+              <Text style={styles.statusButtonText}>{statusFilter}</Text>
+            </TouchableOpacity>
           </View>
         )}
         <FlatList
@@ -149,20 +169,41 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
   },
-  pickerContainer: {
-    backgroundColor: "#fff", // White background for picker container
-    borderWidth: 1,
-    borderColor: "#000", // Thin black border
-    borderRadius: 4,
+  controlsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
     marginTop: 10,
-    width: 200, // Fixed width to make it smaller
+  },
+  pickerContainer: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 4,
+    width: 200,
+    marginRight: 10,
   },
   picker: {
     width: "100%",
   },
   pickerItem: {
-    fontSize: 14, // Ensure text is visible and readable
+    fontSize: 14,
+  },
+  statusButton: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 100,
+  },
+  statusButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
   },
   listContent: {
     paddingBottom: 16,
