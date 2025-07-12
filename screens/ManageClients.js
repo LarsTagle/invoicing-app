@@ -3,27 +3,14 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput,
-  Button,
   FlatList,
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { getClients, insertClient, deleteClient } from "../database/db";
+import { getClients } from "../database/db";
 
 export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [errors, setErrors] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-  });
 
   // Fetch clients from the database
   const fetchClients = async () => {
@@ -41,217 +28,87 @@ export default function ManageClients({ navigation }) {
     fetchClients();
   }, []);
 
-  // Validate inputs
-  const validateName = (name) => {
-    if (!name) return "Name is required";
-    if (/\d/.test(name)) return "Name cannot contain numbers";
-    return "";
+  // Placeholder for Sort button
+  const handleSort = () => {
+    Alert.alert("Sort", "Sort functionality not implemented yet.");
   };
 
-  const validateEmail = (email) => {
-    if (!email) return "";
-    if (!/^\S+@\S+\.\S+$/.test(email)) return "Invalid email format";
-    return "";
-  };
-
-  const validatePhone = (phone) => {
-    if (!phone) return "";
-    if (!/^\+?\d{7,15}$/.test(phone.replace(/\s/g, "")))
-      return "Invalid phone number";
-    return "";
-  };
-
-  // Handle add client
-  const handleAddClient = async () => {
-    const newErrors = {
-      firstName: validateName(firstName),
-      lastName: validateName(lastName),
-      email: validateEmail(email),
-      phone: validatePhone(phone),
-    };
-    setErrors(newErrors);
-
-    if (Object.values(newErrors).some((error) => error !== "")) {
-      return;
-    }
-
-    try {
-      await insertClient(firstName, lastName, email, phone, companyName);
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setPhone("");
-      setCompanyName("");
-      setErrors({ firstName: "", lastName: "", email: "", phone: "" });
-      await fetchClients();
-      Alert.alert("Success", "Client added successfully!");
-    } catch (error) {
-      console.error("Failed to add client:", error);
-      Alert.alert("Error", "Failed to add client. Please try again.");
-    }
-  };
-
-  // Handle delete client
-  const handleDeleteClient = (id, fullName) => {
-    Alert.alert(
-      "Delete Client",
-      `Are you sure you want to delete ${fullName}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteClient(id);
-              await fetchClients();
-              Alert.alert("Success", "Client deleted successfully!");
-            } catch (error) {
-              console.error("Failed to delete client:", error);
-              Alert.alert(
-                "Error",
-                "Failed to delete client. Please try again."
-              );
-            }
-          },
-        },
-      ]
-    );
+  // Placeholder for Create button
+  const handleCreate = () => {
+    Alert.alert("Create", "Create functionality not implemented yet.");
   };
 
   // Render client item
-  const renderClientItem = ({ item }) => {
-    const fullName = `${item.first_name} ${item.last_name}`.trim();
-    return (
-      <View style={styles.clientItem}>
-        <View style={styles.clientDetails}>
-          <Text style={styles.clientName}>{fullName}</Text>
-          <Text style={styles.clientSubText}>ID: {item.client_id}</Text>
-          {item.company_name && (
-            <Text style={styles.clientSubText}>
-              Company: {item.company_name}
-            </Text>
-          )}
-          {item.email && (
-            <Text style={styles.clientSubText}>Email: {item.email}</Text>
-          )}
-          {item.phone && (
-            <Text style={styles.clientSubText}>Phone: {item.phone}</Text>
-          )}
-        </View>
+  const renderClientItem = ({ item }) => (
+    <View style={styles.clientRow}>
+      <Text style={styles.clientText}>{item.client_id}</Text>
+      <Text style={styles.clientText}>{item.first_name}</Text>
+      <Text style={styles.clientText}>{item.last_name}</Text>
+      <Text style={styles.clientText}>{item.email || "-"}</Text>
+      <Text style={styles.clientText}>{item.phone || "-"}</Text>
+      <Text style={styles.clientText}>{item.company_name || "-"}</Text>
+      <View style={styles.actionColumn}>
         <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDeleteClient(item.id, fullName)}
+          style={[styles.actionButton, styles.editButton]}
+          onPress={() =>
+            Alert.alert("Edit", "Edit functionality not implemented yet.")
+          }
         >
-          <Text style={styles.deleteButtonText}>Delete</Text>
+          <Text style={styles.actionButtonText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.deleteButton]}
+          onPress={() =>
+            Alert.alert("Delete", "Delete functionality not implemented yet.")
+          }
+        >
+          <Text style={styles.actionButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
-    );
-  };
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("LandingPage")}
+          onPress={() => navigation.navigate("Dashboard")}
         >
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Clients</Text>
       </View>
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>Add Client</Text>
-        <View style={styles.row}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={firstName}
-              onChangeText={(text) => {
-                setFirstName(text);
-                setErrors((prev) => ({
-                  ...prev,
-                  firstName: validateName(text),
-                }));
-              }}
-              placeholder="First Name"
-            />
-            {errors.firstName ? (
-              <Text style={styles.errorText}>{errors.firstName}</Text>
-            ) : (
-              <Text style={[styles.errorText, styles.placeholder]}> </Text>
-            )}
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={lastName}
-              onChangeText={(text) => {
-                setLastName(text);
-                setErrors((prev) => ({
-                  ...prev,
-                  lastName: validateName(text),
-                }));
-              }}
-              placeholder="Last Name"
-            />
-            {errors.lastName ? (
-              <Text style={styles.errorText}>{errors.lastName}</Text>
-            ) : (
-              <Text style={[styles.errorText, styles.placeholder]}> </Text>
-            )}
-          </View>
-        </View>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={(text) => {
-            setEmail(text);
-            setErrors((prev) => ({ ...prev, email: validateEmail(text) }));
-          }}
-          placeholder="Email"
-          keyboardType="email-address"
-        />
-        {errors.email ? (
-          <Text style={styles.errorText}>{errors.email}</Text>
-        ) : (
-          <Text style={[styles.errorText, styles.placeholder]}> </Text>
-        )}
-        <TextInput
-          style={styles.input}
-          value={phone}
-          onChangeText={(text) => {
-            setPhone(text);
-            setErrors((prev) => ({ ...prev, phone: validatePhone(text) }));
-          }}
-          placeholder="Phone"
-          keyboardType="phone-pad"
-        />
-        {errors.phone ? (
-          <Text style={styles.errorText}>{errors.phone}</Text>
-        ) : (
-          <Text style={[styles.errorText, styles.placeholder]}> </Text>
-        )}
-        <TextInput
-          style={styles.input}
-          value={companyName}
-          onChangeText={setCompanyName}
-          placeholder="Company Name"
-        />
-        <Text style={[styles.errorText, styles.placeholder]}> </Text>
-        <Button title="Add Client" onPress={handleAddClient} />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.sortButton} onPress={handleSort}>
+          <Text style={styles.buttonText}>Sort</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.createButton} onPress={handleCreate}>
+          <Text style={styles.buttonText}>Create</Text>
+        </TouchableOpacity>
       </View>
-      <FlatList
-        data={clients}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderClientItem}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No clients found. Add one!</Text>
-          </View>
-        )}
-        contentContainerStyle={styles.listContent}
-      />
+      <View style={styles.tableContainer}>
+        <View style={styles.clientRow}>
+          <Text style={[styles.clientText, styles.headerText]}>Client ID</Text>
+          <Text style={[styles.clientText, styles.headerText]}>First Name</Text>
+          <Text style={[styles.clientText, styles.headerText]}>Last Name</Text>
+          <Text style={[styles.clientText, styles.headerText]}>Email</Text>
+          <Text style={[styles.clientText, styles.headerText]}>Phone</Text>
+          <Text style={[styles.clientText, styles.headerText]}>Company</Text>
+          <Text style={[styles.clientText, styles.headerText]}>Actions</Text>
+        </View>
+        <FlatList
+          data={clients}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderClientItem}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No clients found.</Text>
+            </View>
+          )}
+          contentContainerStyle={styles.listContent}
+        />
+      </View>
     </View>
   );
 }
@@ -287,77 +144,78 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
-  formContainer: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 4,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#ccc",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  row: {
+  buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  inputContainer: {
+  sortButton: {
+    backgroundColor: "#007bff",
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     flex: 1,
     marginRight: 8,
   },
-  input: {
+  createButton: {
+    backgroundColor: "#28a745",
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    flex: 1,
+    marginLeft: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  tableContainer: {
+    backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 4,
     padding: 8,
-    marginBottom: 4,
   },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    minHeight: 18,
-  },
-  placeholder: {
-    color: "transparent",
-  },
-  clientItem: {
+  clientRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 4,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
-  clientDetails: {
+  clientText: {
     flex: 1,
-  },
-  clientName: {
-    fontSize: 16,
-    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 14,
     color: "#333",
   },
-  clientSubText: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
+  headerText: {
+    fontWeight: "bold",
+  },
+  actionColumn: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  actionButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginVertical: 2,
+  },
+  editButton: {
+    backgroundColor: "#28a745",
   },
   deleteButton: {
     backgroundColor: "#dc3545",
-    borderRadius: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
   },
-  deleteButtonText: {
+  actionButtonText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
+    textAlign: "center",
   },
   emptyContainer: {
     flex: 1,
