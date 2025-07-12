@@ -29,26 +29,89 @@ export default function InvoiceFormScreen({ navigation }) {
   const [showIssueDatePicker, setShowIssueDatePicker] = useState(false);
   const [showDueDatePicker, setShowDueDatePicker] = useState(false);
 
+  // Error state for validation
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    issueDate: "",
+    dueDate: "",
+    itemName: "",
+    itemQuantity: "",
+    itemPrice: "",
+  });
+
   // Calculate total
   const total = items.reduce(
     (sum, item) => sum + item.quantity * item.price,
     0
   );
 
+  // Validation functions
+  const validateName = (name) => {
+    if (!name) return "Name is required";
+    if (/\d/.test(name)) return "Name cannot contain numbers";
+    return "";
+  };
+
+  const validateIssueDate = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of day
+    if (date < today) return "Issue date cannot be earlier than today";
+    return "";
+  };
+
+  const validateDueDate = (due, issue) => {
+    if (due < issue) return "Due date cannot be before issue date";
+    return "";
+  };
+
+  const validateItem = (name, quantity, price) => {
+    const errors = {};
+    if (!name) errors.itemName = "Item name is required";
+    else errors.itemName = "";
+
+    if (!quantity) errors.itemQuantity = "Quantity is required";
+    else if (isNaN(parseInt(quantity)) || parseInt(quantity) <= 0)
+      errors.itemQuantity = "Quantity must be a positive number";
+    else errors.itemQuantity = "";
+
+    if (!price) errors.itemPrice = "Unit price is required";
+    else if (isNaN(parseFloat(price)) || parseFloat(price) <= 0)
+      errors.itemPrice = "Unit price must be a positive number";
+    else errors.itemPrice = "";
+
+    return errors;
+  };
+
+  // Validate all fields
+  const validateForm = () => {
+    const newErrors = {
+      firstName: validateName(firstName),
+      lastName: validateName(lastName),
+      issueDate: validateIssueDate(issueDate),
+      dueDate: validateDueDate(dueDate, issueDate),
+      itemName: "",
+      itemQuantity: "",
+      itemPrice: "",
+    };
+    setErrors(newErrors);
+    return (
+      Object.values(newErrors).every((error) => error === "") &&
+      items.length > 0
+    );
+  };
+
   // Add item to the list
   const addItem = useCallback(() => {
-    if (!itemName || !itemQuantity || !itemPrice) {
-      Alert.alert("Error", "Please fill in all item fields.");
+    const itemErrors = validateItem(itemName, itemQuantity, itemPrice);
+    setErrors((prev) => ({ ...prev, ...itemErrors }));
+
+    if (Object.values(itemErrors).some((error) => error !== "")) {
       return;
     }
 
     const quantity = parseInt(itemQuantity);
     const price = parseFloat(itemPrice);
-
-    if (isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0) {
-      Alert.alert("Error", "Quantity and price must be positive numbers.");
-      return;
-    }
 
     setItems((prev) => [...prev, { name: itemName, quantity, price }]);
     setItemName("");
@@ -69,14 +132,23 @@ export default function InvoiceFormScreen({ navigation }) {
     setShowIssueDatePicker(false);
     setShowDueDatePicker(false);
     setShowItems(true);
+    setErrors({
+      firstName: "",
+      lastName: "",
+      issueDate: "",
+      dueDate: "",
+      itemName: "",
+      itemQuantity: "",
+      itemPrice: "",
+    });
   }, []);
 
   // Submit invoice
   const handleSubmit = useCallback(async () => {
-    if (!firstName || !lastName || items.length === 0) {
+    if (!validateForm()) {
       Alert.alert(
         "Error",
-        "First name, last name, and at least one item are required."
+        "Please fix all validation errors before submitting."
       );
       return;
     }
@@ -151,20 +223,42 @@ export default function InvoiceFormScreen({ navigation }) {
       >
         <Text style={styles.label}>Client Name</Text>
         <View style={styles.row}>
-          <TextInput
-            key="firstName"
-            style={[styles.input, styles.halfInput]}
-            value={firstName}
-            onChangeText={setFirstName}
-            placeholder="First Name"
-          />
-          <TextInput
-            key="lastName"
-            style={[styles.input, styles.halfInput]}
-            value={lastName}
-            onChangeText={setLastName}
-            placeholder="Last Name"
-          />
+          <View style={styles.halfInputContainer}>
+            <TextInput
+              key="firstName"
+              style={[styles.input, styles.halfInput]}
+              value={firstName}
+              onChangeText={(text) => {
+                setFirstName(text);
+                setErrors((prev) => ({
+                  ...prev,
+                  firstName: validateName(text),
+                }));
+              }}
+              placeholder="First Name"
+            />
+            {errors.firstName ? (
+              <Text style={styles.errorText}>{errors.firstName}</Text>
+            ) : null}
+          </View>
+          <View style={styles.halfInputContainer}>
+            <TextInput
+              key="lastName"
+              style={[styles.input, styles.halfInput]}
+              value={lastName}
+              onChangeText={(text) => {
+                setLastName(text);
+                setErrors((prev) => ({
+                  ...prev,
+                  lastName: validateName(text),
+                }));
+              }}
+              placeholder="Last Name"
+            />
+            {errors.lastName ? (
+              <Text style={styles.errorText}>{errors.lastName}</Text>
+            ) : null}
+          </View>
         </View>
 
         <Text style={styles.label}>Dates</Text>
@@ -184,10 +278,20 @@ export default function InvoiceFormScreen({ navigation }) {
                 display="default"
                 onChange={(event, selectedDate) => {
                   setShowIssueDatePicker(false);
-                  if (selectedDate) setIssueDate(selectedDate);
+                  if (selectedDate) {
+                    setIssueDate(selectedDate);
+                    setErrors((prev) => ({
+                      ...prev,
+                      issueDate: validateIssueDate(selectedDate),
+                      dueDate: validateDueDate(dueDate, selectedDate),
+                    }));
+                  }
                 }}
               />
             )}
+            {errors.issueDate ? (
+              <Text style={styles.errorText}>{errors.issueDate}</Text>
+            ) : null}
           </View>
           <View style={styles.halfContainer}>
             <Text style={styles.subLabel}>Due Date</Text>
@@ -204,38 +308,82 @@ export default function InvoiceFormScreen({ navigation }) {
                 display="default"
                 onChange={(event, selectedDate) => {
                   setShowDueDatePicker(false);
-                  if (selectedDate) setDueDate(selectedDate);
+                  if (selectedDate) {
+                    setDueDate(selectedDate);
+                    setErrors((prev) => ({
+                      ...prev,
+                      dueDate: validateDueDate(selectedDate, issueDate),
+                    }));
+                  }
                 }}
               />
             )}
+            {errors.dueDate ? (
+              <Text style={styles.errorText}>{errors.dueDate}</Text>
+            ) : null}
           </View>
         </View>
 
         <Text style={styles.label}>Add Item</Text>
-        <TextInput
-          key="itemName"
-          style={styles.input}
-          value={itemName}
-          onChangeText={setItemName}
-          placeholder="Item name"
-        />
+        <View>
+          <TextInput
+            key="itemName"
+            style={styles.input}
+            value={itemName}
+            onChangeText={(text) => {
+              setItemName(text);
+              setErrors((prev) => ({
+                ...prev,
+                itemName: text ? "" : "Item name is required",
+              }));
+            }}
+            placeholder="Item name"
+          />
+          {errors.itemName ? (
+            <Text style={styles.errorText}>{errors.itemName}</Text>
+          ) : null}
+        </View>
         <View style={styles.row}>
-          <TextInput
-            key="itemQuantity"
-            style={[styles.input, styles.halfInput]}
-            value={itemQuantity}
-            onChangeText={setItemQuantity}
-            placeholder="Quantity"
-            keyboardType="numeric"
-          />
-          <TextInput
-            key="itemPrice"
-            style={[styles.input, styles.halfInput]}
-            value={itemPrice}
-            onChangeText={setItemPrice}
-            placeholder="Unit price"
-            keyboardType="numeric"
-          />
+          <View style={styles.halfInputContainer}>
+            <TextInput
+              key="itemQuantity"
+              style={[styles.input, styles.halfInput]}
+              value={itemQuantity}
+              onChangeText={(text) => {
+                setItemQuantity(text);
+                const itemErrors = validateItem(itemName, text, itemPrice);
+                setErrors((prev) => ({
+                  ...prev,
+                  itemQuantity: itemErrors.itemQuantity,
+                }));
+              }}
+              placeholder="Quantity"
+              keyboardType="numeric"
+            />
+            {errors.itemQuantity ? (
+              <Text style={styles.errorText}>{errors.itemQuantity}</Text>
+            ) : null}
+          </View>
+          <View style={styles.halfInputContainer}>
+            <TextInput
+              key="itemPrice"
+              style={[styles.input, styles.halfInput]}
+              value={itemPrice}
+              onChangeText={(text) => {
+                setItemPrice(text);
+                const itemErrors = validateItem(itemName, itemQuantity, text);
+                setErrors((prev) => ({
+                  ...prev,
+                  itemPrice: itemErrors.itemPrice,
+                }));
+              }}
+              placeholder="Unit price"
+              keyboardType="numeric"
+            />
+            {errors.itemPrice ? (
+              <Text style={styles.errorText}>{errors.itemPrice}</Text>
+            ) : null}
+          </View>
         </View>
         <Button title="Add Item" onPress={addItem} />
 
@@ -309,6 +457,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
+  halfInputContainer: {
+    flex: 1,
+    marginRight: 8,
+  },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -373,5 +525,10 @@ const styles = StyleSheet.create({
   total: {
     fontSize: 18,
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginBottom: 8,
   },
 });
