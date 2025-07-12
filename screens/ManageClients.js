@@ -7,16 +7,43 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { getClients, deleteClient } from "../database/db";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getClients } from "../database/db";
 
 export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
+  const [deletedClientIds, setDeletedClientIds] = useState([]);
 
-  // Fetch clients from the database
+  // Load deleted client IDs from AsyncStorage
+  const loadDeletedClientIds = async () => {
+    try {
+      const stored = await AsyncStorage.getItem("deletedClients");
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error("Failed to load deleted client IDs:", error);
+      return [];
+    }
+  };
+
+  // Save deleted client IDs to AsyncStorage
+  const saveDeletedClientIds = async (ids) => {
+    try {
+      await AsyncStorage.setItem("deletedClients", JSON.stringify(ids));
+    } catch (error) {
+      console.error("Failed to save deleted client IDs:", error);
+    }
+  };
+
+  // Fetch clients and filter out deleted ones
   const fetchClients = async () => {
     try {
       const data = await getClients();
-      setClients(data);
+      const deletedIds = await loadDeletedClientIds();
+      setDeletedClientIds(deletedIds);
+      const filteredClients = data.filter(
+        (client) => !deletedIds.includes(client.id)
+      );
+      setClients(filteredClients);
     } catch (error) {
       console.error("Failed to fetch clients:", error);
       Alert.alert("Error", "Failed to load clients. Please try again.");
@@ -33,28 +60,24 @@ export default function ManageClients({ navigation }) {
     Alert.alert("Sort", "Sort functionality not implemented yet.");
   };
 
-  // Handle Delete client
+  // Handle Delete client (UI-only)
   const handleDelete = (id, fullName) => {
     Alert.alert(
       "Delete Client",
-      `Are you sure you want to delete ${fullName}?`,
+      `Are you sure you want to delete ${fullName}? This will permanently remove the client from the list but keep it in the database.`,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteClient(id);
-              await fetchClients();
-              Alert.alert("Success", "Client deleted successfully!");
-            } catch (error) {
-              console.error("Failed to delete client:", error);
-              Alert.alert(
-                "Error",
-                "Failed to delete client. Please try again."
-              );
-            }
+          onPress: () => {
+            const newDeletedClientIds = [...deletedClientIds, id];
+            setDeletedClientIds(newDeletedClientIds);
+            saveDeletedClientIds(newDeletedClientIds);
+            setClients((prevClients) =>
+              prevClients.filter((client) => client.id !== id)
+            );
+            Alert.alert("Success", "Client removed from the list.");
           },
         },
       ]
