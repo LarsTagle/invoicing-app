@@ -1,18 +1,41 @@
-// database/db.js
 import * as SQLite from "expo-sqlite";
 
 const dbName = "invoice.db";
+
+// Clear the database by dropping all tables
+export async function clearDatabase() {
+  const db = await SQLite.openDatabaseAsync(dbName);
+  try {
+    await db.execAsync(`
+      DROP TABLE IF EXISTS invoices;
+      DROP TABLE IF EXISTS items;
+    `);
+    console.log("Database cleared successfully");
+  } catch (error) {
+    console.error("Error clearing database:", error);
+    throw error;
+  } finally {
+    await db.closeAsync();
+  }
+}
 
 // Initialize the database
 export async function initializeDatabase() {
   const db = await SQLite.openDatabaseAsync(dbName);
   try {
-    // Create invoices table
+    // Drop existing tables to ensure a clean schema
+    await db.execAsync(`
+      DROP TABLE IF EXISTS invoices;
+      DROP TABLE IF EXISTS items;
+    `);
+
+    // Create invoices table with first_name and last_name
     await db.execAsync(`
       PRAGMA journal_mode = WAL;
       CREATE TABLE IF NOT EXISTS invoices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        client TEXT NOT NULL,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
         issue_date TEXT NOT NULL,
         due_date TEXT NOT NULL,
         total REAL NOT NULL,
@@ -43,7 +66,8 @@ export async function initializeDatabase() {
 
 // Insert a new invoice
 export async function insertInvoice(
-  client,
+  first_name,
+  last_name,
   issue_date,
   due_date,
   total,
@@ -52,14 +76,22 @@ export async function insertInvoice(
   const db = await SQLite.openDatabaseAsync(dbName);
   try {
     // Validate parameters
-    if (!client || !issue_date || !due_date || total == null || !status) {
+    if (
+      !first_name ||
+      !last_name ||
+      !issue_date ||
+      !due_date ||
+      total == null ||
+      !status
+    ) {
       throw new Error(
-        `Invalid invoice parameters: client=${client}, issue_date=${issue_date}, due_date=${due_date}, total=${total}, status=${status}`
+        `Invalid invoice parameters: first_name=${first_name}, last_name=${last_name}, issue_date=${issue_date}, due_date=${due_date}, total=${total}, status=${status}`
       );
     }
 
     console.log("Inserting invoice with values:", {
-      client,
+      first_name,
+      last_name,
       issue_date,
       due_date,
       total: Number(total),
@@ -67,8 +99,8 @@ export async function insertInvoice(
     });
 
     const result = await db.runAsync(
-      `INSERT INTO invoices (client, issue_date, due_date, total, status) VALUES (?, ?, ?, ?, ?);`,
-      [client, issue_date, due_date, Number(total), status]
+      `INSERT INTO invoices (first_name, last_name, issue_date, due_date, total, status) VALUES (?, ?, ?, ?, ?, ?);`,
+      [first_name, last_name, issue_date, due_date, Number(total), status]
     );
     return result.lastInsertRowId;
   } catch (error) {

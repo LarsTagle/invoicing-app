@@ -17,6 +17,9 @@ export default function InvoiceItemCard({ invoice, onStatusUpdate }) {
   const formattedTotal =
     invoice.total != null ? Number(invoice.total).toFixed(2) : "0.00";
 
+  // Combine first_name and last_name for display
+  const clientName = `${invoice.first_name} ${invoice.last_name}`.trim();
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -32,7 +35,7 @@ export default function InvoiceItemCard({ invoice, onStatusUpdate }) {
       </View>
       <View style={styles.details}>
         <Text style={styles.label}>Client:</Text>
-        <Text style={styles.value}>{invoice.client}</Text>
+        <Text style={styles.value}>{clientName}</Text>
       </View>
       <View style={styles.details}>
         <Text style={styles.label}>Due Date:</Text>

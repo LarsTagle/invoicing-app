@@ -17,8 +17,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function InvoiceFormScreen({ navigation }) {
   // Form state
-  const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [issueDate, setIssueDate] = useState(new Date());
   const [dueDate, setDueDate] = useState(new Date());
   const [items, setItems] = useState([]);
@@ -153,11 +153,10 @@ export default function InvoiceFormScreen({ navigation }) {
       return;
     }
 
-    const client = `${firstName} ${lastName}`.trim();
-
     try {
       console.log("Submitting invoice:", {
-        client,
+        first_name: firstName,
+        last_name: lastName,
         issue_date: issueDate.toISOString(),
         due_date: dueDate.toISOString(),
         total,
@@ -165,7 +164,8 @@ export default function InvoiceFormScreen({ navigation }) {
       });
 
       const invoiceId = await insertInvoice(
-        client,
+        firstName,
+        lastName,
         issueDate.toISOString(),
         dueDate.toISOString(),
         total,
@@ -225,24 +225,6 @@ export default function InvoiceFormScreen({ navigation }) {
         <View style={styles.row}>
           <View style={styles.halfInputContainer}>
             <TextInput
-              key="firstName"
-              style={[styles.input, styles.halfInput]}
-              value={firstName}
-              onChangeText={(text) => {
-                setFirstName(text);
-                setErrors((prev) => ({
-                  ...prev,
-                  firstName: validateName(text),
-                }));
-              }}
-              placeholder="First Name"
-            />
-            {errors.firstName ? (
-              <Text style={styles.errorText}>{errors.firstName}</Text>
-            ) : null}
-          </View>
-          <View style={styles.halfInputContainer}>
-            <TextInput
               key="lastName"
               style={[styles.input, styles.halfInput]}
               value={lastName}
@@ -257,6 +239,24 @@ export default function InvoiceFormScreen({ navigation }) {
             />
             {errors.lastName ? (
               <Text style={styles.errorText}>{errors.lastName}</Text>
+            ) : null}
+          </View>
+          <View style={styles.halfInputContainer}>
+            <TextInput
+              key="firstName"
+              style={[styles.input, styles.halfInput]}
+              value={firstName}
+              onChangeText={(text) => {
+                setFirstName(text);
+                setErrors((prev) => ({
+                  ...prev,
+                  firstName: validateName(text),
+                }));
+              }}
+              placeholder="First Name"
+            />
+            {errors.firstName ? (
+              <Text style={styles.errorText}>{errors.firstName}</Text>
             ) : null}
           </View>
         </View>
