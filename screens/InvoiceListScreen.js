@@ -1,10 +1,16 @@
-// screens/InvoiceListScreen.js
 import React, { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, View, RefreshControl } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  RefreshControl,
+  TouchableOpacity,
+} from "react-native";
 import InvoiceItemCard from "../components/InvoiceItemCard";
 import { getInvoices } from "../database/db";
 
-export default function InvoiceListScreen() {
+export default function InvoiceListScreen({ navigation }) {
   const [invoices, setInvoices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -43,6 +49,15 @@ export default function InvoiceListScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Invoices</Text>
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={() => navigation.navigate("InvoiceForm")}
+        >
+          <Text style={styles.createButtonText}>Create</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={invoices}
         keyExtractor={(item) => item.id.toString()}
@@ -63,6 +78,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    paddingTop: 50,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  createButton: {
+    backgroundColor: "#28a745",
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  createButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
   listContent: {
     padding: 16,

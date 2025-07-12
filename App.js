@@ -1,4 +1,3 @@
-// App.js
 import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -18,17 +17,14 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="InvoiceForm">
-        <Stack.Screen
-          name="InvoiceList"
-          component={InvoiceListScreen}
-          options={{ title: "Invoices" }}
-        />
-        <Stack.Screen
-          name="InvoiceForm"
-          component={InvoiceFormScreen}
-          options={{ title: "Create Invoice" }}
-        />
+      <Stack.Navigator
+        initialRouteName="InvoiceList"
+        screenOptions={{
+          headerShown: false, // Hide default navigation bar
+        }}
+      >
+        <Stack.Screen name="InvoiceList" component={InvoiceListScreen} />
+        <Stack.Screen name="InvoiceForm" component={InvoiceFormScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

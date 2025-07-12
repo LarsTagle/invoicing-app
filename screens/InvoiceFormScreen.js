@@ -148,6 +148,27 @@ export default function InvoiceFormScreen({ navigation }) {
     });
   }, []);
 
+  // Handle cancel button press
+  const handleCancel = useCallback(() => {
+    Alert.alert(
+      "Cancel Invoice Creation",
+      "Are you sure you want to cancel creating this invoice?",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => {
+            clearForm();
+            navigation.navigate("InvoiceList");
+          },
+        },
+      ]
+    );
+  }, [clearForm, navigation]);
+
   // Submit invoice
   const handleSubmit = useCallback(async () => {
     if (!validateForm()) {
@@ -222,6 +243,12 @@ export default function InvoiceFormScreen({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Create Invoice</Text>
+        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+          <Text style={styles.cancelButtonText}>X</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -435,6 +462,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    paddingTop: 50,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  cancelButton: {
+    backgroundColor: "#dc3545",
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  cancelButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
   scrollContent: {
     padding: 16,
