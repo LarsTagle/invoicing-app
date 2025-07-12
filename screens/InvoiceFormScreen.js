@@ -46,6 +46,11 @@ export default function InvoiceFormScreen({ navigation }) {
     0
   );
 
+  // Format date to YYYY-MM-DD
+  const formatDate = (date) => {
+    return date.toISOString().split("T")[0];
+  };
+
   // Validation functions
   const validateName = (name) => {
     if (!name) return "Name is required";
@@ -157,8 +162,8 @@ export default function InvoiceFormScreen({ navigation }) {
       console.log("Submitting invoice:", {
         first_name: firstName,
         last_name: lastName,
-        issue_date: issueDate.toISOString(),
-        due_date: dueDate.toISOString(),
+        issue_date: formatDate(issueDate),
+        due_date: formatDate(dueDate),
         total,
         status: "Unpaid",
       });
@@ -166,8 +171,8 @@ export default function InvoiceFormScreen({ navigation }) {
       const invoiceId = await insertInvoice(
         firstName,
         lastName,
-        issueDate.toISOString(),
-        dueDate.toISOString(),
+        formatDate(issueDate),
+        formatDate(dueDate),
         total,
         "Unpaid"
       );
@@ -269,7 +274,7 @@ export default function InvoiceFormScreen({ navigation }) {
               style={styles.dateButton}
               onPress={() => setShowIssueDatePicker(true)}
             >
-              <Text>{issueDate.toLocaleDateString()}</Text>
+              <Text>{formatDate(issueDate)}</Text>
             </TouchableOpacity>
             {showIssueDatePicker && (
               <DateTimePicker
@@ -299,7 +304,7 @@ export default function InvoiceFormScreen({ navigation }) {
               style={styles.dateButton}
               onPress={() => setShowDueDatePicker(true)}
             >
-              <Text>{dueDate.toLocaleDateString()}</Text>
+              <Text>{formatDate(dueDate)}</Text>
             </TouchableOpacity>
             {showDueDatePicker && (
               <DateTimePicker
