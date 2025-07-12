@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,13 +12,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { insertInvoice, insertItem } from "../database/db";
+import { Picker } from "@react-native-picker/picker";
+import { insertInvoice, insertItem, getClients } from "../database/db";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function InvoiceFormScreen({ navigation }) {
   // Form state
-  const [lastName, setLastName] = useState("");
-  const [firstName, setFirstName] = useState("");
+  const [clients, setClients] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState("");
   const [issueDate, setIssueDate] = useState(new Date());
   const [dueDate, setDueDate] = useState(new Date());
   const [items, setItems] = useState([]);
@@ -31,14 +32,27 @@ export default function InvoiceFormScreen({ navigation }) {
 
   // Error state for validation
   const [errors, setErrors] = useState({
-    firstName: "",
-    lastName: "",
+    client: "",
     issueDate: "",
     dueDate: "",
     itemName: "",
     itemQuantity: "",
     itemPrice: "",
   });
+
+  // Fetch clients on mount
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const data = await getClients();
+        setClients(data);
+      } catch (error) {
+        console.error("Failed to fetch clients:", error);
+        Alert.alert("Error", "Failed to load clients. Please try again.");
+      }
+    };
+    fetchClients();
+  }, []);
 
   // Calculate total
   const total = items.reduce(
@@ -52,9 +66,8 @@ export default function InvoiceFormScreen({ navigation }) {
   };
 
   // Validation functions
-  const validateName = (name) => {
-    if (!name) return "Name is required";
-    if (/\d/.test(name)) return "Name cannot contain numbers";
+  const validateClient = (clientId) => {
+    if (!clientId) return "Client is required";
     return "";
   };
 
@@ -90,9 +103,11 @@ export default function InvoiceFormScreen({ navigation }) {
 
   // Validate all fields
   const validateForm = () => {
+    const selectedClient = clients.find(
+      (c) => c.client_id === selectedClientId
+    );
     const newErrors = {
-      firstName: validateName(firstName),
-      lastName: validateName(lastName),
+      client: validateClient(selectedClientId),
       issueDate: validateIssueDate(issueDate),
       dueDate: validateDueDate(dueDate, issueDate),
       itemName: "",
@@ -126,8 +141,7 @@ export default function InvoiceFormScreen({ navigation }) {
 
   // Clear form state
   const clearForm = useCallback(() => {
-    setFirstName("");
-    setLastName("");
+    setSelectedClientId("");
     setIssueDate(new Date());
     setDueDate(new Date());
     setItems([]);
@@ -138,8 +152,7 @@ export default function InvoiceFormScreen({ navigation }) {
     setShowDueDatePicker(false);
     setShowItems(true);
     setErrors({
-      firstName: "",
-      lastName: "",
+      client: "",
       issueDate: "",
       dueDate: "",
       itemName: "",
@@ -179,10 +192,14 @@ export default function InvoiceFormScreen({ navigation }) {
       return;
     }
 
+    const selectedClient = clients.find(
+      (c) => c.client_id === selectedClientId
+    );
     try {
       console.log("Submitting invoice:", {
-        first_name: firstName,
-        last_name: lastName,
+        client_id: selectedClient.client_id,
+        first_name: selectedClient.first_name,
+        last_name: selectedClient.last_name,
         issue_date: formatDate(issueDate),
         due_date: formatDate(dueDate),
         total,
@@ -190,8 +207,9 @@ export default function InvoiceFormScreen({ navigation }) {
       });
 
       const invoiceId = await insertInvoice(
-        firstName,
-        lastName,
+        selectedClient.client_id,
+        selectedClient.first_name,
+        selectedClient.last_name,
         formatDate(issueDate),
         formatDate(dueDate),
         total,
@@ -210,8 +228,8 @@ export default function InvoiceFormScreen({ navigation }) {
       console.error("Submit error:", error);
     }
   }, [
-    firstName,
-    lastName,
+    selectedClientId,
+    clients,
     issueDate,
     dueDate,
     items,
@@ -253,46 +271,57 @@ export default function InvoiceFormScreen({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.label}>Client Name</Text>
-        <View style={styles.row}>
-          <View style={styles.halfInputContainer}>
-            <TextInput
-              key="lastName"
-              style={[styles.input, styles.halfInput, styles.inputLeft]}
-              value={lastName}
-              onChangeText={(text) => {
-                setLastName(text);
-                setErrors((prev) => ({
-                  ...prev,
-                  lastName: validateName(text),
-                }));
-              }}
-              placeholder="Last Name"
-            />
-            {errors.lastName ? (
-              <Text style={styles.errorText}>{errors.lastName}</Text>
-            ) : null}
-          </View>
-          <View style={styles.halfInputContainer}>
-            <TextInput
-              key="firstName"
-              style={[styles.input, styles.halfInput]}
-              value={firstName}
-              onChangeText={(text) => {
-                setFirstName(text);
-                setErrors((prev) => ({
-                  ...prev,
-                  firstName: validateName(text),
-                }));
-              }}
-              placeholder="First Name"
-            />
-            {errors.firstName ? (
-              <Text style={styles.errorText}>{errors.firstName}</Text>
-            ) : null}
-          </View>
+        <Text style={styles.label}>Client</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={selectedClientId}
+            style={styles.picker}
+            onValueChange={(value) => {
+              setSelectedClientId(value);
+              setErrors((prev) => ({ ...prev, client: validateClient(value) }));
+            }}
+          >
+            <Picker.Item label="Select Client" value="" />
+            {clients.map((client) => (
+              <Picker.Item
+                key={client.client_id}
+                label={`${client.client_id}: ${client.first_name} ${client.last_name}`}
+                value={client.client_id}
+              />
+            ))}
+          </Picker>
+          {errors.client ? (
+            <Text style={styles.errorText}>{errors.client}</Text>
+          ) : (
+            <Text style={[styles.errorText, styles.placeholder]}> </Text>
+          )}
         </View>
-
+        {selectedClientId && (
+          <View style={styles.clientDetails}>
+            {clients.find((c) => c.client_id === selectedClientId)?.email && (
+              <Text style={styles.clientDetailText}>
+                Email:{" "}
+                {clients.find((c) => c.client_id === selectedClientId).email}
+              </Text>
+            )}
+            {clients.find((c) => c.client_id === selectedClientId)?.phone && (
+              <Text style={styles.clientDetailText}>
+                Phone:{" "}
+                {clients.find((c) => c.client_id === selectedClientId).phone}
+              </Text>
+            )}
+            {clients.find((c) => c.client_id === selectedClientId)
+              ?.company_name && (
+              <Text style={styles.clientDetailText}>
+                Company:{" "}
+                {
+                  clients.find((c) => c.client_id === selectedClientId)
+                    .company_name
+                }
+              </Text>
+            )}
+          </View>
+        )}
         <Text style={styles.label}>Dates</Text>
         <View style={styles.row}>
           <View style={styles.halfContainer}>
@@ -323,7 +352,9 @@ export default function InvoiceFormScreen({ navigation }) {
             )}
             {errors.issueDate ? (
               <Text style={styles.errorText}>{errors.issueDate}</Text>
-            ) : null}
+            ) : (
+              <Text style={[styles.errorText, styles.placeholder]}> </Text>
+            )}
           </View>
           <View style={styles.halfContainer}>
             <Text style={styles.subLabel}>Due Date</Text>
@@ -352,10 +383,11 @@ export default function InvoiceFormScreen({ navigation }) {
             )}
             {errors.dueDate ? (
               <Text style={styles.errorText}>{errors.dueDate}</Text>
-            ) : null}
+            ) : (
+              <Text style={[styles.errorText, styles.placeholder]}> </Text>
+            )}
           </View>
         </View>
-
         <Text style={styles.label}>Add Item</Text>
         <View>
           <TextInput
@@ -373,7 +405,9 @@ export default function InvoiceFormScreen({ navigation }) {
           />
           {errors.itemName ? (
             <Text style={styles.errorText}>{errors.itemName}</Text>
-          ) : null}
+          ) : (
+            <Text style={[styles.errorText, styles.placeholder]}> </Text>
+          )}
         </View>
         <View style={styles.row}>
           <View style={styles.halfInputContainer}>
@@ -394,7 +428,9 @@ export default function InvoiceFormScreen({ navigation }) {
             />
             {errors.itemQuantity ? (
               <Text style={styles.errorText}>{errors.itemQuantity}</Text>
-            ) : null}
+            ) : (
+              <Text style={[styles.errorText, styles.placeholder]}> </Text>
+            )}
           </View>
           <View style={styles.halfInputContainer}>
             <TextInput
@@ -414,11 +450,12 @@ export default function InvoiceFormScreen({ navigation }) {
             />
             {errors.itemPrice ? (
               <Text style={styles.errorText}>{errors.itemPrice}</Text>
-            ) : null}
+            ) : (
+              <Text style={[styles.errorText, styles.placeholder]}> </Text>
+            )}
           </View>
         </View>
         <Button title="Add Item" onPress={addItem} />
-
         <View style={styles.itemsHeader}>
           <Text style={styles.label}>Items</Text>
           <TouchableOpacity onPress={toggleItemsVisibility}>
@@ -519,6 +556,7 @@ const styles = StyleSheet.create({
   },
   halfInputContainer: {
     flex: 1,
+    marginRight: 8,
   },
   row: {
     flexDirection: "row",
@@ -536,6 +574,16 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 8,
     marginBottom: 8,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 4,
+    marginBottom: 8,
+    backgroundColor: "#fff",
+  },
+  picker: {
+    width: "100%",
   },
   itemsHeader: {
     flexDirection: "row",
@@ -590,6 +638,17 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 12,
+    minHeight: 18,
+  },
+  placeholder: {
+    color: "transparent",
+  },
+  clientDetails: {
     marginBottom: 8,
+  },
+  clientDetailText: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 4,
   },
 });

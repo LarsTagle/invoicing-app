@@ -15,7 +15,15 @@ export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [errors, setErrors] = useState({ firstName: "", lastName: "" });
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
 
   // Fetch clients from the database
   const fetchClients = async () => {
@@ -33,10 +41,23 @@ export default function ManageClients({ navigation }) {
     fetchClients();
   }, []);
 
-  // Validate name
+  // Validate inputs
   const validateName = (name) => {
     if (!name) return "Name is required";
     if (/\d/.test(name)) return "Name cannot contain numbers";
+    return "";
+  };
+
+  const validateEmail = (email) => {
+    if (!email) return "";
+    if (!/^\S+@\S+\.\S+$/.test(email)) return "Invalid email format";
+    return "";
+  };
+
+  const validatePhone = (phone) => {
+    if (!phone) return "";
+    if (!/^\+?\d{7,15}$/.test(phone.replace(/\s/g, "")))
+      return "Invalid phone number";
     return "";
   };
 
@@ -45,6 +66,8 @@ export default function ManageClients({ navigation }) {
     const newErrors = {
       firstName: validateName(firstName),
       lastName: validateName(lastName),
+      email: validateEmail(email),
+      phone: validatePhone(phone),
     };
     setErrors(newErrors);
 
@@ -53,10 +76,13 @@ export default function ManageClients({ navigation }) {
     }
 
     try {
-      await insertClient(firstName, lastName);
+      await insertClient(firstName, lastName, email, phone, companyName);
       setFirstName("");
       setLastName("");
-      setErrors({ firstName: "", lastName: "" });
+      setEmail("");
+      setPhone("");
+      setCompanyName("");
+      setErrors({ firstName: "", lastName: "", email: "", phone: "" });
       await fetchClients();
       Alert.alert("Success", "Client added successfully!");
     } catch (error) {
@@ -98,7 +124,21 @@ export default function ManageClients({ navigation }) {
     const fullName = `${item.first_name} ${item.last_name}`.trim();
     return (
       <View style={styles.clientItem}>
-        <Text style={styles.clientName}>{fullName}</Text>
+        <View style={styles.clientDetails}>
+          <Text style={styles.clientName}>{fullName}</Text>
+          <Text style={styles.clientSubText}>ID: {item.client_id}</Text>
+          {item.company_name && (
+            <Text style={styles.clientSubText}>
+              Company: {item.company_name}
+            </Text>
+          )}
+          {item.email && (
+            <Text style={styles.clientSubText}>Email: {item.email}</Text>
+          )}
+          {item.phone && (
+            <Text style={styles.clientSubText}>Phone: {item.phone}</Text>
+          )}
+        </View>
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => handleDeleteClient(item.id, fullName)}
@@ -114,7 +154,7 @@ export default function ManageClients({ navigation }) {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Dashboard")}
+          onPress={() => navigation.navigate("LandingPage")}
         >
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
@@ -162,6 +202,43 @@ export default function ManageClients({ navigation }) {
             )}
           </View>
         </View>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            setErrors((prev) => ({ ...prev, email: validateEmail(text) }));
+          }}
+          placeholder="Email"
+          keyboardType="email-address"
+        />
+        {errors.email ? (
+          <Text style={styles.errorText}>{errors.email}</Text>
+        ) : (
+          <Text style={[styles.errorText, styles.placeholder]}> </Text>
+        )}
+        <TextInput
+          style={styles.input}
+          value={phone}
+          onChangeText={(text) => {
+            setPhone(text);
+            setErrors((prev) => ({ ...prev, phone: validatePhone(text) }));
+          }}
+          placeholder="Phone"
+          keyboardType="phone-pad"
+        />
+        {errors.phone ? (
+          <Text style={styles.errorText}>{errors.phone}</Text>
+        ) : (
+          <Text style={[styles.errorText, styles.placeholder]}> </Text>
+        )}
+        <TextInput
+          style={styles.input}
+          value={companyName}
+          onChangeText={setCompanyName}
+          placeholder="Company Name"
+        />
+        <Text style={[styles.errorText, styles.placeholder]}> </Text>
         <Button title="Add Client" onPress={handleAddClient} />
       </View>
       <FlatList
@@ -258,9 +335,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
   },
+  clientDetails: {
+    flex: 1,
+  },
   clientName: {
     fontSize: 16,
+    fontWeight: "bold",
     color: "#333",
+  },
+  clientSubText: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 4,
   },
   deleteButton: {
     backgroundColor: "#dc3545",

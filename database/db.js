@@ -24,17 +24,19 @@ export async function clearDatabase() {
 export async function initializeDatabase() {
   const db = await SQLite.openDatabaseAsync(dbName);
   try {
-    // Create invoices table with first_name and last_name
+    // Create invoices table
     await db.execAsync(`
       PRAGMA journal_mode = WAL;
       CREATE TABLE IF NOT EXISTS invoices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_id TEXT NOT NULL,
         first_name TEXT NOT NULL,
         last_name TEXT NOT NULL,
         issue_date TEXT NOT NULL,
         due_date TEXT NOT NULL,
         total REAL NOT NULL,
-        status TEXT NOT NULL
+        status TEXT NOT NULL,
+        FOREIGN KEY (client_id) REFERENCES clients(client_id)
       );
     `);
 
@@ -54,8 +56,12 @@ export async function initializeDatabase() {
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS clients (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_id TEXT NOT NULL UNIQUE,
         first_name TEXT NOT NULL,
-        last_name TEXT NOT NULL
+        last_name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        company_name TEXT
       );
     `);
 
@@ -68,8 +74,35 @@ export async function initializeDatabase() {
   }
 }
 
+// Generate a unique client_id
+async function generateClientId() {
+  const db = await SQLite.openDatabaseAsync(dbName);
+  try {
+    const result = await db.getFirstAsync(
+      `SELECT client_id FROM clients ORDER BY client_id DESC LIMIT 1;`
+    );
+    let nextNumber = 1;
+    if (result && result.client_id) {
+      const lastNumber = parseInt(result.client_id.replace("CUST-", ""));
+      nextNumber = lastNumber + 1;
+    }
+    return `CUST-${nextNumber.toString().padStart(3, "0")}`;
+  } catch (error) {
+    console.error("Error generating client_id:", error);
+    throw error;
+  } finally {
+    await db.closeAsync();
+  }
+}
+
 // Insert a new client
-export async function insertClient(first_name, last_name) {
+export async function insertClient(
+  first_name,
+  last_name,
+  email,
+  phone,
+  company_name
+) {
   const db = await SQLite.openDatabaseAsync(dbName);
   try {
     if (!first_name || !last_name) {
@@ -77,9 +110,10 @@ export async function insertClient(first_name, last_name) {
         `Invalid client parameters: first_name=${first_name}, last_name=${last_name}`
       );
     }
+    const client_id = await generateClientId();
     const result = await db.runAsync(
-      `INSERT INTO clients (first_name, last_name) VALUES (?, ?);`,
-      [first_name, last_name]
+      `INSERT INTO clients (client_id, first_name, last_name, email, phone, company_name) VALUES (?, ?, ?, ?, ?, ?);`,
+      [client_id, first_name, last_name, email, phone, company_name]
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -119,6 +153,7 @@ export async function deleteClient(id) {
 
 // Insert a new invoice
 export async function insertInvoice(
+  client_id,
   first_name,
   last_name,
   issue_date,
@@ -130,6 +165,7 @@ export async function insertInvoice(
   try {
     // Validate parameters
     if (
+      !client_id ||
       !first_name ||
       !last_name ||
       !issue_date ||
@@ -138,11 +174,12 @@ export async function insertInvoice(
       !status
     ) {
       throw new Error(
-        `Invalid invoice parameters: first_name=${first_name}, last_name=${last_name}, issue_date=${issue_date}, due_date=${due_date}, total=${total}, status=${status}`
+        `Invalid invoice parameters: client_id=${client_id}, first_name=${first_name}, last_name=${last_name}, issue_date=${issue_date}, due_date=${due_date}, total=${total}, status=${status}`
       );
     }
 
     console.log("Inserting invoice with values:", {
+      client_id,
       first_name,
       last_name,
       issue_date,
@@ -152,8 +189,16 @@ export async function insertInvoice(
     });
 
     const result = await db.runAsync(
-      `INSERT INTO invoices (first_name, last_name, issue_date, due_date, total, status) VALUES (?, ?, ?, ?, ?, ?);`,
-      [first_name, last_name, issue_date, due_date, Number(total), status]
+      `INSERT INTO invoices (client_id, first_name, last_name, issue_date, due_date, total, status) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+      [
+        client_id,
+        first_name,
+        last_name,
+        issue_date,
+        due_date,
+        Number(total),
+        status,
+      ]
     );
     return result.lastInsertRowId;
   } catch (error) {
