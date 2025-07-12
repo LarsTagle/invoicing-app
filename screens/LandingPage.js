@@ -28,9 +28,7 @@ export default function LandingPage({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          onPress={() =>
-            Alert.alert("Clients", "Client management coming soon!")
-          }
+          onPress={() => navigation.navigate("ManageClients")}
         >
           <Text style={styles.buttonText}>Clients</Text>
         </TouchableOpacity>

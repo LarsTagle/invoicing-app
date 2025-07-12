@@ -9,6 +9,7 @@ export async function clearDatabase() {
     await db.execAsync(`
       DROP TABLE IF EXISTS invoices;
       DROP TABLE IF EXISTS items;
+      DROP TABLE IF EXISTS clients;
     `);
     console.log("Database cleared successfully");
   } catch (error) {
@@ -49,9 +50,67 @@ export async function initializeDatabase() {
       );
     `);
 
+    // Create clients table
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS clients (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL
+      );
+    `);
+
     console.log("Database initialized successfully");
   } catch (error) {
     console.error("Error initializing database:", error);
+    throw error;
+  } finally {
+    await db.closeAsync();
+  }
+}
+
+// Insert a new client
+export async function insertClient(first_name, last_name) {
+  const db = await SQLite.openDatabaseAsync(dbName);
+  try {
+    if (!first_name || !last_name) {
+      throw new Error(
+        `Invalid client parameters: first_name=${first_name}, last_name=${last_name}`
+      );
+    }
+    const result = await db.runAsync(
+      `INSERT INTO clients (first_name, last_name) VALUES (?, ?);`,
+      [first_name, last_name]
+    );
+    return result.lastInsertRowId;
+  } catch (error) {
+    console.error("Error inserting client:", error);
+    throw error;
+  } finally {
+    await db.closeAsync();
+  }
+}
+
+// Fetch all clients
+export async function getClients() {
+  const db = await SQLite.openDatabaseAsync(dbName);
+  try {
+    const clients = await db.getAllAsync(`SELECT * FROM clients;`);
+    return clients;
+  } catch (error) {
+    console.error("Error fetching clients:", error);
+    throw error;
+  } finally {
+    await db.closeAsync();
+  }
+}
+
+// Delete a client
+export async function deleteClient(id) {
+  const db = await SQLite.openDatabaseAsync(dbName);
+  try {
+    await db.runAsync(`DELETE FROM clients WHERE id = ?;`, [id]);
+  } catch (error) {
+    console.error("Error deleting client:", error);
     throw error;
   } finally {
     await db.closeAsync();

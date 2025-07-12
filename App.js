@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import InvoiceListScreen from "./screens/InvoiceListScreen";
 import InvoiceFormScreen from "./screens/InvoiceFormScreen";
 import LandingPage from "./screens/LandingPage";
+import ManageClients from "./screens/ManageClients";
 import { initializeDatabase } from "./database/db";
 
 const Stack = createStackNavigator();
@@ -29,6 +30,11 @@ export default function App() {
         <Stack.Screen
           name="InvoiceForm"
           component={InvoiceFormScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ManageClients"
+          component={ManageClients}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
