@@ -23,12 +23,6 @@ export async function clearDatabase() {
 export async function initializeDatabase() {
   const db = await SQLite.openDatabaseAsync(dbName);
   try {
-    // Drop existing tables to ensure a clean schema
-    await db.execAsync(`
-      DROP TABLE IF EXISTS invoices;
-      DROP TABLE IF EXISTS items;
-    `);
-
     // Create invoices table with first_name and last_name
     await db.execAsync(`
       PRAGMA journal_mode = WAL;
