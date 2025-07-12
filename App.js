@@ -5,6 +5,8 @@ import InvoiceListScreen from "./screens/InvoiceListScreen";
 import InvoiceFormScreen from "./screens/InvoiceFormScreen";
 import LandingPage from "./screens/LandingPage";
 import ManageClients from "./screens/ManageClients";
+import CreateClient from "./screens/CreateClient";
+import EditClient from "./screens/EditClient";
 import { initializeDatabase } from "./database/db";
 
 const Stack = createStackNavigator();
@@ -35,6 +37,16 @@ export default function App() {
         <Stack.Screen
           name="ManageClients"
           component={ManageClients}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CreateClient"
+          component={CreateClient}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EditClient"
+          component={EditClient}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

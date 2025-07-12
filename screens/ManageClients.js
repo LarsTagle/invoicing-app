@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { getClients } from "../database/db";
+import { getClients, deleteClient } from "../database/db";
 
 export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
@@ -28,14 +28,37 @@ export default function ManageClients({ navigation }) {
     fetchClients();
   }, []);
 
-  // Placeholder for Sort button
+  // Handle Sort button (placeholder)
   const handleSort = () => {
     Alert.alert("Sort", "Sort functionality not implemented yet.");
   };
 
-  // Placeholder for Create button
-  const handleCreate = () => {
-    Alert.alert("Create", "Create functionality not implemented yet.");
+  // Handle Delete client
+  const handleDelete = (id, fullName) => {
+    Alert.alert(
+      "Delete Client",
+      `Are you sure you want to delete ${fullName}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteClient(id);
+              await fetchClients();
+              Alert.alert("Success", "Client deleted successfully!");
+            } catch (error) {
+              console.error("Failed to delete client:", error);
+              Alert.alert(
+                "Error",
+                "Failed to delete client. Please try again."
+              );
+            }
+          },
+        },
+      ]
+    );
   };
 
   // Render client item
@@ -50,16 +73,14 @@ export default function ManageClients({ navigation }) {
       <View style={styles.actionColumn}>
         <TouchableOpacity
           style={[styles.actionButton, styles.editButton]}
-          onPress={() =>
-            Alert.alert("Edit", "Edit functionality not implemented yet.")
-          }
+          onPress={() => navigation.navigate("EditClient", { client: item })}
         >
           <Text style={styles.actionButtonText}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.deleteButton]}
           onPress={() =>
-            Alert.alert("Delete", "Delete functionality not implemented yet.")
+            handleDelete(item.id, `${item.first_name} ${item.last_name}`)
           }
         >
           <Text style={styles.actionButtonText}>Delete</Text>
@@ -73,7 +94,7 @@ export default function ManageClients({ navigation }) {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Dashboard")}
+          onPress={() => navigation.navigate("LandingPage")}
         >
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
@@ -83,7 +104,10 @@ export default function ManageClients({ navigation }) {
         <TouchableOpacity style={styles.sortButton} onPress={handleSort}>
           <Text style={styles.buttonText}>Sort</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.createButton} onPress={handleCreate}>
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={() => navigation.navigate("CreateClient")}
+        >
           <Text style={styles.buttonText}>Create</Text>
         </TouchableOpacity>
       </View>

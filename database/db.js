@@ -124,6 +124,35 @@ export async function insertClient(
   }
 }
 
+// Update a client
+export async function updateClient(
+  id,
+  client_id,
+  first_name,
+  last_name,
+  email,
+  phone,
+  company_name
+) {
+  const db = await SQLite.openDatabaseAsync(dbName);
+  try {
+    if (!first_name || !last_name) {
+      throw new Error(
+        `Invalid client parameters: first_name=${first_name}, last_name=${last_name}`
+      );
+    }
+    await db.runAsync(
+      `UPDATE clients SET first_name = ?, last_name = ?, email = ?, phone = ?, company_name = ? WHERE id = ? AND client_id = ?;`,
+      [first_name, last_name, email, phone, company_name, id, client_id]
+    );
+  } catch (error) {
+    console.error("Error updating client:", error);
+    throw error;
+  } finally {
+    await db.closeAsync();
+  }
+}
+
 // Fetch all clients
 export async function getClients() {
   const db = await SQLite.openDatabaseAsync(dbName);
