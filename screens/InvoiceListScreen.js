@@ -50,7 +50,7 @@ export default function InvoiceListScreen({ navigation }) {
       case "client":
         const nameA = `${a.first_name} ${a.last_name}`.toLowerCase();
         const nameB = `${b.first_name} ${b.last_name}`.toLowerCase();
-        return nameA.localeCompare(nameB); // Alphabetical sort for client name
+        return nameB.localeCompare(nameA); // Alphabetical sort for client name
       case "status":
         return a.status.localeCompare(b.status); // Alphabetical sort for status
       case "due_date":

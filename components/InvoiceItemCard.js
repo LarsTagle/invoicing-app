@@ -18,7 +18,7 @@ export default function InvoiceItemCard({ invoice, onStatusUpdate }) {
     invoice.total != null ? Number(invoice.total).toFixed(2) : "0.00";
 
   // Combine first_name and last_name for display
-  const clientName = `${invoice.first_name} ${invoice.last_name}`.trim();
+  const clientName = `${invoice.last_name}, ${invoice.first_name}`.trim();
 
   return (
     <View style={styles.card}>
