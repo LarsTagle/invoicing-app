@@ -1,30 +1,36 @@
 import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import InvoiceListScreen from "./screens/InvoiceListScreen";
 import InvoiceFormScreen from "./screens/InvoiceFormScreen";
+import LandingPage from "./screens/LandingPage";
 import { initializeDatabase } from "./database/db";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 export default function App() {
   useEffect(() => {
-    // Initialize the database when the app starts
-    initializeDatabase().catch((error) => {
-      console.error("Failed to initialize database:", error);
-    });
+    initializeDatabase();
   }, []);
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="InvoiceList"
-        screenOptions={{
-          headerShown: false, // Hide default navigation bar
-        }}
-      >
-        <Stack.Screen name="InvoiceList" component={InvoiceListScreen} />
-        <Stack.Screen name="InvoiceForm" component={InvoiceFormScreen} />
+      <Stack.Navigator initialRouteName="LandingPage">
+        <Stack.Screen
+          name="LandingPage"
+          component={LandingPage}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="InvoiceList"
+          component={InvoiceListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="InvoiceForm"
+          component={InvoiceFormScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
