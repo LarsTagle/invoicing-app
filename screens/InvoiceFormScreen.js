@@ -258,7 +258,7 @@ export default function InvoiceFormScreen({ navigation }) {
           <View style={styles.halfInputContainer}>
             <TextInput
               key="lastName"
-              style={[styles.input, styles.halfInput]}
+              style={[styles.input, styles.halfInput, styles.inputLeft]}
               value={lastName}
               onChangeText={(text) => {
                 setLastName(text);
@@ -298,7 +298,7 @@ export default function InvoiceFormScreen({ navigation }) {
           <View style={styles.halfContainer}>
             <Text style={styles.subLabel}>Issue Date</Text>
             <TouchableOpacity
-              style={styles.dateButton}
+              style={[styles.dateButton, styles.dateButtonLeft]}
               onPress={() => setShowIssueDatePicker(true)}
             >
               <Text>{formatDate(issueDate)}</Text>
@@ -379,7 +379,7 @@ export default function InvoiceFormScreen({ navigation }) {
           <View style={styles.halfInputContainer}>
             <TextInput
               key="itemQuantity"
-              style={[styles.input, styles.halfInput]}
+              style={[styles.input, styles.halfInput, styles.inputLeft]}
               value={itemQuantity}
               onChangeText={(text) => {
                 setItemQuantity(text);
@@ -513,11 +513,12 @@ const styles = StyleSheet.create({
   },
   halfInput: {
     flex: 1,
+  },
+  inputLeft: {
     marginRight: 8,
   },
   halfInputContainer: {
     flex: 1,
-    marginRight: 8,
   },
   row: {
     flexDirection: "row",
@@ -525,6 +526,8 @@ const styles = StyleSheet.create({
   },
   halfContainer: {
     flex: 1,
+  },
+  dateButtonLeft: {
     marginRight: 8,
   },
   dateButton: {
