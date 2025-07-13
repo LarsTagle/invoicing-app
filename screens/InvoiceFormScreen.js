@@ -160,6 +160,26 @@ export default function InvoiceFormScreen({ navigation }) {
     });
   }, []);
 
+  const handleCancel = useCallback(() => {
+    Alert.alert(
+      "Cancel Invoice Creation",
+      "Are you sure you want to cancel creating this invoice?",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => {
+            clearForm();
+            navigation.navigate("InvoiceList");
+          },
+        },
+      ]
+    );
+  }, [clearForm, navigation]);
+
   const handleSubmit = useCallback(async () => {
     if (!validateForm()) {
       Alert.alert(
@@ -224,10 +244,7 @@ export default function InvoiceFormScreen({ navigation }) {
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("InvoiceList")}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Invoice</Text>
