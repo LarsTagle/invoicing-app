@@ -13,6 +13,7 @@ import {
   Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { insertInvoice, insertItem, getClients } from "../database/db";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
@@ -40,12 +41,27 @@ export default function InvoiceFormScreen({ navigation }) {
     itemPrice: "",
   });
 
-  // Fetch clients on mount
+  // Load deleted client IDs from AsyncStorage
+  const loadDeletedClientIds = async () => {
+    try {
+      const stored = await AsyncStorage.getItem("deletedClients");
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error("Failed to load deleted client IDs:", error);
+      return [];
+    }
+  };
+
+  // Fetch clients and filter out deleted ones
   useEffect(() => {
     const fetchClients = async () => {
       try {
         const data = await getClients();
-        setClients(data);
+        const deletedIds = await loadDeletedClientIds();
+        const filteredClients = data.filter(
+          (client) => !deletedIds.includes(client.id)
+        );
+        setClients(filteredClients);
       } catch (error) {
         console.error("Failed to fetch clients:", error);
         Alert.alert("Error", "Failed to load clients. Please try again.");
