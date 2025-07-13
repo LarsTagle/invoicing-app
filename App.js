@@ -8,12 +8,22 @@ import ManageClients from "./screens/ManageClients";
 import CreateClient from "./screens/CreateClient";
 import EditClient from "./screens/EditClient";
 import ViewClients from "./screens/ViewClients";
-import { initializeDatabase } from "./database/db";
+import { initializeDatabase, clearDatabase } from "./database/db";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   useEffect(() => {
+    // for clearing the database
+    // const resetDatabase = async () => {
+    //   try {
+    //     await clearDatabase();
+    //     await initializeDatabase();
+    //   } catch (error) {
+    //     console.error("Failed to reset database:", error);
+    //   }
+    // };
+    // resetDatabase();
     initializeDatabase();
   }, []);
 
