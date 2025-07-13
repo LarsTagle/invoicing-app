@@ -8,12 +8,13 @@ import {
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getClients } from "../database/db";
+import { getClients, getInvoices } from "../database/db";
 
 export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
   const [deletedClientIds, setDeletedClientIds] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState(null);
+  const [pendingCounts, setPendingCounts] = useState({});
 
   const loadDeletedClientIds = async () => {
     try {
@@ -33,23 +34,36 @@ export default function ManageClients({ navigation }) {
     }
   };
 
-  const fetchClients = async () => {
+  const fetchClientsAndInvoices = async () => {
     try {
       const data = await getClients();
+      const invoices = await getInvoices();
       const deletedIds = await loadDeletedClientIds();
       setDeletedClientIds(deletedIds);
       const filteredClients = data.filter(
         (client) => !deletedIds.includes(client.id)
       );
+
+      // Calculate pending invoice counts for each client
+      const counts = {};
+      filteredClients.forEach((client) => {
+        const unpaidCount = invoices.filter(
+          (invoice) =>
+            invoice.client_id === client.client_id &&
+            invoice.status === "Unpaid"
+        ).length;
+        counts[client.id] = unpaidCount;
+      });
+      setPendingCounts(counts);
       setClients(filteredClients);
     } catch (error) {
-      console.error("Failed to fetch clients:", error);
+      console.error("Failed to fetch clients or invoices:", error);
       Alert.alert("Error", "Failed to load clients. Please try again.");
     }
   };
 
   useEffect(() => {
-    fetchClients();
+    fetchClientsAndInvoices();
   }, []);
 
   const handleSort = () => {
@@ -72,6 +86,11 @@ export default function ManageClients({ navigation }) {
             setClients((prevClients) =>
               prevClients.filter((client) => client.id !== id)
             );
+            setPendingCounts((prev) => {
+              const newCounts = { ...prev };
+              delete newCounts[id];
+              return newCounts;
+            });
             setSelectedClientId(null);
             Alert.alert("Success", "Client removed from the list.");
           },
@@ -97,6 +116,7 @@ export default function ManageClients({ navigation }) {
         <Text style={styles.clientText}>{item.client_id}</Text>
         <Text style={styles.clientText}>{item.first_name}</Text>
         <Text style={styles.clientText}>{item.last_name}</Text>
+        <Text style={styles.clientText}>{pendingCounts[item.id] || 0}</Text>
       </TouchableOpacity>
       {selectedClientId === item.id && (
         <View style={styles.actionButtons}>
@@ -152,6 +172,7 @@ export default function ManageClients({ navigation }) {
           <Text style={[styles.clientText, styles.headerText]}>Client ID</Text>
           <Text style={[styles.clientText, styles.headerText]}>First Name</Text>
           <Text style={[styles.clientText, styles.headerText]}>Last Name</Text>
+          <Text style={[styles.clientText, styles.headerText]}>Pendings</Text>
         </View>
         <FlatList
           data={clients}

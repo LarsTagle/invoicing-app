@@ -1,8 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { getInvoices } from "../database/db";
 
 export default function ViewClients({ navigation, route }) {
   const { client } = route.params;
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const invoices = await getInvoices();
+        const unpaidCount = invoices.filter(
+          (invoice) =>
+            invoice.client_id === client.client_id &&
+            invoice.status === "Unpaid"
+        ).length;
+        setPendingCount(unpaidCount);
+      } catch (error) {
+        console.error("Failed to fetch invoices:", error);
+      }
+    };
+    fetchPendingCount();
+  }, [client.client_id]);
 
   return (
     <View style={styles.container}>
@@ -28,6 +47,8 @@ export default function ViewClients({ navigation, route }) {
         <Text style={styles.detailText}>{client.phone || "-"}</Text>
         <Text style={styles.label}>Company</Text>
         <Text style={styles.detailText}>{client.company_name || "-"}</Text>
+        <Text style={styles.label}># of Pending Payments</Text>
+        <Text style={styles.detailText}>{pendingCount}</Text>
       </View>
     </View>
   );
