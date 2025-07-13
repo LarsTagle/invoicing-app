@@ -251,18 +251,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   actionButtons: {
-    flexDirection: "column",
-    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginBottom: 8,
   },
   actionButton: {
     paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginVertical: 4,
+    paddingHorizontal: 12,
+    marginHorizontal: 4,
     borderRadius: 4,
-    width: 100,
   },
   viewButton: {
     backgroundColor: "#007bff",
