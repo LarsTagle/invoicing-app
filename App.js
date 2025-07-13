@@ -9,18 +9,22 @@ import CreateClient from "./screens/CreateClient";
 import EditClient from "./screens/EditClient";
 import ViewClients from "./screens/ViewClients";
 import { initializeDatabase, clearDatabase } from "./database/db";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   useEffect(() => {
-    // for clearing the database
+    // for clearing the database and AsyncStorage
     // const resetDatabase = async () => {
     //   try {
+    //     // Clear AsyncStorage for deletedClients
+    //     await AsyncStorage.removeItem("deletedClients");
+    //     // Clear and reinitialize the database
     //     await clearDatabase();
     //     await initializeDatabase();
     //   } catch (error) {
-    //     console.error("Failed to reset database:", error);
+    //     console.error("Failed to reset database or AsyncStorage:", error);
     //   }
     // };
     // resetDatabase();
