@@ -13,9 +13,8 @@ import { getClients } from "../database/db";
 export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
   const [deletedClientIds, setDeletedClientIds] = useState([]);
-  const [selectedClientId, setSelectedClientId] = useState(null); // Track selected client
+  const [selectedClientId, setSelectedClientId] = useState(null);
 
-  // Load deleted client IDs from AsyncStorage
   const loadDeletedClientIds = async () => {
     try {
       const stored = await AsyncStorage.getItem("deletedClients");
@@ -26,7 +25,6 @@ export default function ManageClients({ navigation }) {
     }
   };
 
-  // Save deleted client IDs to AsyncStorage
   const saveDeletedClientIds = async (ids) => {
     try {
       await AsyncStorage.setItem("deletedClients", JSON.stringify(ids));
@@ -35,7 +33,6 @@ export default function ManageClients({ navigation }) {
     }
   };
 
-  // Fetch clients and filter out deleted ones
   const fetchClients = async () => {
     try {
       const data = await getClients();
@@ -51,17 +48,14 @@ export default function ManageClients({ navigation }) {
     }
   };
 
-  // Fetch clients on component mount
   useEffect(() => {
     fetchClients();
   }, []);
 
-  // Handle Sort button (placeholder)
   const handleSort = () => {
     Alert.alert("Sort", "Sort functionality not implemented yet.");
   };
 
-  // Handle Delete client (UI-only)
   const handleDelete = (id, fullName) => {
     Alert.alert(
       "Delete Client",
@@ -78,7 +72,7 @@ export default function ManageClients({ navigation }) {
             setClients((prevClients) =>
               prevClients.filter((client) => client.id !== id)
             );
-            setSelectedClientId(null); // Hide buttons after delete
+            setSelectedClientId(null);
             Alert.alert("Success", "Client removed from the list.");
           },
         },
@@ -86,17 +80,14 @@ export default function ManageClients({ navigation }) {
     );
   };
 
-  // Handle View button
   const handleView = (client) => {
     navigation.navigate("ViewClients", { client });
   };
 
-  // Handle row click to toggle action buttons
   const handleRowClick = (id) => {
-    setSelectedClientId((prev) => (prev === id ? null : id)); // Toggle selection
+    setSelectedClientId((prev) => (prev === id ? null : id));
   };
 
-  // Render client item
   const renderClientItem = ({ item }) => (
     <View>
       <TouchableOpacity
@@ -141,7 +132,7 @@ export default function ManageClients({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.navigate("LandingPage")}
         >
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Clients</Text>
       </View>
@@ -198,7 +189,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   backButtonText: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: "600",
     color: "#007bff",
   },
@@ -260,8 +251,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   actionButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: "column",
+    alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginBottom: 8,
@@ -269,8 +260,9 @@ const styles = StyleSheet.create({
   actionButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    marginHorizontal: 8,
+    marginVertical: 4,
     borderRadius: 4,
+    width: 100,
   },
   viewButton: {
     backgroundColor: "#007bff",

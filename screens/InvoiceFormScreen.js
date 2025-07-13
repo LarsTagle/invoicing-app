@@ -18,7 +18,6 @@ import { insertInvoice, insertItem, getClients } from "../database/db";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function InvoiceFormScreen({ navigation }) {
-  // Form state
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState("");
   const [issueDate, setIssueDate] = useState(new Date());
@@ -30,8 +29,6 @@ export default function InvoiceFormScreen({ navigation }) {
   const [showItems, setShowItems] = useState(true);
   const [showIssueDatePicker, setShowIssueDatePicker] = useState(false);
   const [showDueDatePicker, setShowDueDatePicker] = useState(false);
-
-  // Error state for validation
   const [errors, setErrors] = useState({
     client: "",
     issueDate: "",
@@ -41,7 +38,6 @@ export default function InvoiceFormScreen({ navigation }) {
     itemPrice: "",
   });
 
-  // Load deleted client IDs from AsyncStorage
   const loadDeletedClientIds = async () => {
     try {
       const stored = await AsyncStorage.getItem("deletedClients");
@@ -52,7 +48,6 @@ export default function InvoiceFormScreen({ navigation }) {
     }
   };
 
-  // Fetch clients and filter out deleted ones
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -70,18 +65,15 @@ export default function InvoiceFormScreen({ navigation }) {
     fetchClients();
   }, []);
 
-  // Calculate total
   const total = items.reduce(
     (sum, item) => sum + item.quantity * item.price,
     0
   );
 
-  // Format date to YYYY-MM-DD
   const formatDate = (date) => {
     return date.toISOString().split("T")[0];
   };
 
-  // Validation functions
   const validateClient = (clientId) => {
     if (!clientId) return "Client is required";
     return "";
@@ -89,7 +81,7 @@ export default function InvoiceFormScreen({ navigation }) {
 
   const validateIssueDate = (date) => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to start of day
+    today.setHours(0, 0, 0, 0);
     if (date < today) return "Issue date cannot be earlier than today";
     return "";
   };
@@ -103,21 +95,17 @@ export default function InvoiceFormScreen({ navigation }) {
     const errors = {};
     if (!name) errors.itemName = "Item name is required";
     else errors.itemName = "";
-
     if (!quantity) errors.itemQuantity = "Quantity is required";
     else if (isNaN(parseInt(quantity)) || parseInt(quantity) <= 0)
       errors.itemQuantity = "Quantity must be a positive number";
     else errors.itemQuantity = "";
-
     if (!price) errors.itemPrice = "Unit price is required";
     else if (isNaN(parseFloat(price)) || parseFloat(price) <= 0)
       errors.itemPrice = "Unit price must be a positive number";
     else errors.itemPrice = "";
-
     return errors;
   };
 
-  // Validate all fields
   const validateForm = () => {
     const selectedClient = clients.find(
       (c) => c.client_id === selectedClientId
@@ -137,25 +125,20 @@ export default function InvoiceFormScreen({ navigation }) {
     );
   };
 
-  // Add item to the list
   const addItem = useCallback(() => {
     const itemErrors = validateItem(itemName, itemQuantity, itemPrice);
     setErrors((prev) => ({ ...prev, ...itemErrors }));
-
     if (Object.values(itemErrors).some((error) => error !== "")) {
       return;
     }
-
     const quantity = parseInt(itemQuantity);
     const price = parseFloat(itemPrice);
-
     setItems((prev) => [...prev, { name: itemName, quantity, price }]);
     setItemName("");
     setItemQuantity("");
     setItemPrice("");
   }, [itemName, itemQuantity, itemPrice]);
 
-  // Clear form state
   const clearForm = useCallback(() => {
     setSelectedClientId("");
     setIssueDate(new Date());
@@ -177,28 +160,6 @@ export default function InvoiceFormScreen({ navigation }) {
     });
   }, []);
 
-  // Handle cancel button press
-  const handleCancel = useCallback(() => {
-    Alert.alert(
-      "Cancel Invoice Creation",
-      "Are you sure you want to cancel creating this invoice?",
-      [
-        {
-          text: "No",
-          style: "cancel",
-        },
-        {
-          text: "Yes",
-          onPress: () => {
-            clearForm();
-            navigation.navigate("InvoiceList");
-          },
-        },
-      ]
-    );
-  }, [clearForm, navigation]);
-
-  // Submit invoice
   const handleSubmit = useCallback(async () => {
     if (!validateForm()) {
       Alert.alert(
@@ -207,21 +168,10 @@ export default function InvoiceFormScreen({ navigation }) {
       );
       return;
     }
-
     const selectedClient = clients.find(
       (c) => c.client_id === selectedClientId
     );
     try {
-      console.log("Submitting invoice:", {
-        client_id: selectedClient.client_id,
-        first_name: selectedClient.first_name,
-        last_name: selectedClient.last_name,
-        issue_date: formatDate(issueDate),
-        due_date: formatDate(dueDate),
-        total,
-        status: "Unpaid",
-      });
-
       const invoiceId = await insertInvoice(
         selectedClient.client_id,
         selectedClient.first_name,
@@ -231,11 +181,9 @@ export default function InvoiceFormScreen({ navigation }) {
         total,
         "Unpaid"
       );
-
       for (const item of items) {
         await insertItem(invoiceId, item.name, item.quantity, item.price);
       }
-
       Alert.alert("Success", "Invoice created successfully!");
       clearForm();
       navigation.navigate("InvoiceList");
@@ -254,12 +202,10 @@ export default function InvoiceFormScreen({ navigation }) {
     navigation,
   ]);
 
-  // Toggle Items list visibility
   const toggleItemsVisibility = useCallback(() => {
     setShowItems((prev) => !prev);
   }, []);
 
-  // Render item in the item list
   const renderItem = ({ item }) => (
     <View style={styles.itemRow}>
       <Text style={styles.itemText}>{item.name}</Text>
@@ -278,10 +224,13 @@ export default function InvoiceFormScreen({ navigation }) {
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Create Invoice</Text>
-        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-          <Text style={styles.cancelButtonText}>X</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("InvoiceList")}
+        >
+          <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Create Invoice</Text>
       </View>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -518,7 +467,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 16,
     paddingTop: 50,
@@ -526,21 +475,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
+  backButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  backButtonText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#007bff",
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-  },
-  cancelButton: {
-    backgroundColor: "#dc3545",
-    borderRadius: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
   },
   scrollContent: {
     padding: 16,

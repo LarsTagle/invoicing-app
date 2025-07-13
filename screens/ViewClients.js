@@ -11,7 +11,7 @@ export default function ViewClients({ navigation, route }) {
           style={styles.backButton}
           onPress={() => navigation.navigate("ManageClients")}
         >
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Client Details</Text>
       </View>
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   backButtonText: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: "600",
     color: "#007bff",
   },

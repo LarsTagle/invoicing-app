@@ -14,14 +14,12 @@ import { getInvoices } from "../database/db";
 export default function InvoiceListScreen({ navigation }) {
   const [invoices, setInvoices] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [sortField, setSortField] = useState("id"); // Default sort by invoice number
-  const [statusFilter, setStatusFilter] = useState("All"); // Default to show all invoices
+  const [sortField, setSortField] = useState("id");
+  const [statusFilter, setStatusFilter] = useState("All");
 
-  // Fetch invoices from the database
   const fetchInvoices = async () => {
     try {
       const data = await getInvoices();
-      // Filter out invalid invoices
       const validInvoices = data.filter(
         (invoice) => invoice && invoice.id && invoice.total != null
       );
@@ -31,26 +29,22 @@ export default function InvoiceListScreen({ navigation }) {
     }
   };
 
-  // Handle pull-to-refresh
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchInvoices();
     setRefreshing(false);
   };
 
-  // Fetch invoices on component mount
   useEffect(() => {
     fetchInvoices();
   }, []);
 
-  // Toggle status filter between All, Paid, and Unpaid
   const toggleStatusFilter = () => {
     setStatusFilter((prev) =>
       prev === "All" ? "Paid" : prev === "Paid" ? "Unpaid" : "All"
     );
   };
 
-  // Filter and sort invoices
   const filteredInvoices = invoices.filter((invoice) =>
     statusFilter === "All" ? true : invoice.status === statusFilter
   );
@@ -58,23 +52,22 @@ export default function InvoiceListScreen({ navigation }) {
   const sortedInvoices = [...filteredInvoices].sort((a, b) => {
     switch (sortField) {
       case "id":
-        return a.id - b.id; // Numeric sort for invoice number
+        return a.id - b.id;
       case "client":
         const nameA = `${a.first_name} ${a.last_name}`.toLowerCase();
         const nameB = `${b.first_name} ${b.last_name}`.toLowerCase();
-        return nameB.localeCompare(nameA); // Alphabetical sort for client name
+        return nameB.localeCompare(nameA);
       case "status":
-        return a.status.localeCompare(b.status); // Alphabetical sort for status
+        return a.status.localeCompare(b.status);
       case "due_date":
-        return new Date(a.due_date) - new Date(b.due_date); // Date sort
+        return new Date(a.due_date) - new Date(b.due_date);
       case "total":
-        return a.total - b.total; // Numeric sort for total
+        return a.total - b.total;
       default:
-        return a.id - b.id; // Fallback to invoice number
+        return a.id - b.id;
     }
   });
 
-  // Render empty state
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyText}>No invoices found. Create one!</Text>
@@ -84,6 +77,12 @@ export default function InvoiceListScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("LandingPage")}
+        >
+          <Text style={styles.backButtonText}>←</Text>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Invoices</Text>
         <TouchableOpacity
           style={styles.createButton}
@@ -148,6 +147,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
+  },
+  backButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  backButtonText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#007bff",
   },
   headerTitle: {
     fontSize: 24,
