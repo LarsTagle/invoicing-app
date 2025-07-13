@@ -10,12 +10,14 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getClients, getInvoices } from "../database/db";
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 
 export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
   const [deletedClientIds, setDeletedClientIds] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState(null);
   const [pendingCounts, setPendingCounts] = useState({});
+  const [sortField, setSortField] = useState("id");
 
   const loadDeletedClientIds = async () => {
     try {
@@ -67,10 +69,6 @@ export default function ManageClients({ navigation }) {
     fetchClientsAndInvoices();
   }, []);
 
-  const handleSort = () => {
-    Alert.alert("Sort", "Sort functionality not implemented yet.");
-  };
-
   const handleDelete = (id, fullName) => {
     Alert.alert(
       "Delete Client",
@@ -108,6 +106,23 @@ export default function ManageClients({ navigation }) {
     setSelectedClientId((prev) => (prev === id ? null : id));
   };
 
+  const sortedClients = [...clients].sort((a, b) => {
+    switch (sortField) {
+      case "id":
+        return a.client_id.localeCompare(b.client_id);
+      case "last_name":
+        return a.last_name.localeCompare(b.last_name);
+      case "pending":
+        return (pendingCounts[b.id] || 0) - (pendingCounts[a.id] || 0);
+      case "company":
+        const companyA = a.company_name || "";
+        const companyB = b.company_name || "";
+        return companyA.localeCompare(companyB);
+      default:
+        return a.client_id.localeCompare(b.client_id);
+    }
+  });
+
   const renderClientItem = ({ item }) => (
     <View>
       <TouchableOpacity
@@ -115,9 +130,10 @@ export default function ManageClients({ navigation }) {
         onPress={() => handleRowClick(item.id)}
       >
         <Text style={styles.clientText}>{item.client_id}</Text>
-        <Text style={styles.clientText}>{item.first_name}</Text>
         <Text style={styles.clientText}>{item.last_name}</Text>
+        <Text style={styles.clientText}>{item.first_name}</Text>
         <Text style={styles.clientText}>{pendingCounts[item.id] || 0}</Text>
+        <Text style={styles.clientText}>{item.company_name || "-"}</Text>
       </TouchableOpacity>
       {selectedClientId === item.id && (
         <View style={styles.actionButtons}>
@@ -157,26 +173,39 @@ export default function ManageClients({ navigation }) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Clients</Text>
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.sortButton} onPress={handleSort}>
-          <Text style={styles.buttonText}>Sort</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={() => navigation.navigate("CreateClient")}
-        >
-          <Text style={styles.buttonText}>Create</Text>
-        </TouchableOpacity>
+      <View style={styles.controlsContainer}>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={sortField}
+            style={styles.picker}
+            onValueChange={(itemValue) => setSortField(itemValue)}
+            itemStyle={styles.pickerItem}
+          >
+            <Picker.Item label="Sort by Client Number" value="id" />
+            <Picker.Item label="Sort by Last Name" value="last_name" />
+            <Picker.Item label="Sort by Number of Pendings" value="pending" />
+            <Picker.Item label="Sort by Company" value="company" />
+          </Picker>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.createButton}
+            onPress={() => navigation.navigate("CreateClient")}
+          >
+            <Text style={styles.buttonText}>Create</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.tableContainer}>
         <View style={styles.clientRow}>
           <Text style={[styles.clientText, styles.headerText]}>Client ID</Text>
-          <Text style={[styles.clientText, styles.headerText]}>First Name</Text>
           <Text style={[styles.clientText, styles.headerText]}>Last Name</Text>
+          <Text style={[styles.clientText, styles.headerText]}>First Name</Text>
           <Text style={[styles.clientText, styles.headerText]}>Pendings</Text>
+          <Text style={[styles.clientText, styles.headerText]}>Company</Text>
         </View>
         <FlatList
-          data={clients}
+          data={sortedClients}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderClientItem}
           ListEmptyComponent={() => (
@@ -217,26 +246,36 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
-  buttonContainer: {
+  controlsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: 10,
   },
-  sortButton: {
-    backgroundColor: "#007bff",
+  pickerContainer: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#000",
     borderRadius: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    width: 200,
+    marginRight: 10,
+  },
+  picker: {
+    width: "100%",
+  },
+  pickerItem: {
+    fontSize: 14,
+  },
+  buttonContainer: {
     flex: 1,
-    marginRight: 8,
+    justifyContent: "flex-end",
+    flexDirection: "row",
   },
   createButton: {
     backgroundColor: "#28a745",
     borderRadius: 4,
     paddingVertical: 8,
     paddingHorizontal: 16,
-    flex: 1,
-    marginLeft: 8,
   },
   buttonText: {
     color: "#fff",
