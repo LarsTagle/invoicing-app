@@ -63,7 +63,7 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
     <View style={styles.formContainer}>
       <Text style={styles.label}>Client Details</Text>
       <View style={styles.row}>
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, styles.rowInputContainer]}>
           <TextInput
             style={styles.input}
             value={firstName}
@@ -77,7 +77,7 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
             <Text style={styles.errorText}>{errors.firstName}</Text>
           )}
         </View>
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, styles.rowInputContainer]}>
           <TextInput
             style={styles.input}
             value={lastName}
@@ -140,43 +140,51 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
 const styles = StyleSheet.create({
   formContainer: {
     backgroundColor: "#fff",
-    padding: 16,
+    padding: 24, // Increased for more internal space
     borderRadius: 4,
-    marginBottom: 16,
-    marginTop: 10,
+    marginTop: 16, // Increased from 10 for more space above
     marginHorizontal: 16,
+    marginBottom: 24, // Increased from 16 for more space below
     borderWidth: 1,
     borderColor: "#ccc",
   },
   label: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 12, // Increased for more space below label
   },
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
+    justifyContent: "space-between", // Ensures even spacing for First Name and Last Name
+    marginBottom: 16, // Increased for vertical spacing
   },
   inputContainer: {
-    flex: 1,
-    marginRight: 8,
-    marginBottom: 12, // Reserve space for error messages
+    flex: 1, // Ensures inputs take available space
+    marginBottom: 16, // Increased to account for removed placeholder space
+    width: "100%", // Ensures full width for non-row inputs
+  },
+  rowInputContainer: {
+    marginRight: 12, // Increased for space between First Name and Last Name
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 4,
-    padding: 8,
-    marginBottom: 4,
+    padding: 12, // Increased for better internal spacing
+    marginBottom: 8, // Increased for space below input
+    height: 40, // Explicit height for consistent sizing
+    width: "100%", // Ensures full width for all inputs
   },
   errorText: {
     color: "red",
     fontSize: 12,
+    minHeight: 18, // Maintains consistent height for error messages
+    marginTop: 4, // Separates error text from input
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
+    marginTop: 16, // Increased for more space above buttons
+    paddingHorizontal: 16, // Prevents buttons from touching edges
   },
 });

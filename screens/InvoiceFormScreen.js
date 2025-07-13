@@ -476,7 +476,6 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    // justifyContent: "flex-start",
     alignItems: "center",
     padding: 16,
     paddingTop: 50,

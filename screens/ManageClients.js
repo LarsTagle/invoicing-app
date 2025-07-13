@@ -72,7 +72,7 @@ export default function ManageClients({ navigation }) {
   const handleDelete = (id, fullName) => {
     Alert.alert(
       "Delete Client",
-      `Are you sure you want to delete ${fullName}? This will permanently remove the client from the list but keep it in the database.`,
+      `Are you sure you want to delete ${fullName}? This will permanently remove the client from the list.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -131,7 +131,6 @@ export default function ManageClients({ navigation }) {
       >
         <Text style={styles.clientText}>{item.client_id}</Text>
         <Text style={styles.clientText}>{item.last_name}</Text>
-        <Text style={styles.clientText}>{item.first_name}</Text>
         <Text style={styles.clientText}>{pendingCounts[item.id] || 0}</Text>
         <Text style={styles.clientText}>{item.company_name || "-"}</Text>
       </TouchableOpacity>
@@ -172,6 +171,12 @@ export default function ManageClients({ navigation }) {
           <Ionicons name="arrow-back" size={24} color="#007bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Clients</Text>
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={() => navigation.navigate("CreateClient")}
+        >
+          <Text style={styles.createButtonText}>Create</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.controlsContainer}>
         <View style={styles.pickerContainer}>
@@ -187,20 +192,11 @@ export default function ManageClients({ navigation }) {
             <Picker.Item label="Sort by Company" value="company" />
           </Picker>
         </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.createButton}
-            onPress={() => navigation.navigate("CreateClient")}
-          >
-            <Text style={styles.buttonText}>Create</Text>
-          </TouchableOpacity>
-        </View>
       </View>
       <View style={styles.tableContainer}>
         <View style={styles.clientRow}>
           <Text style={[styles.clientText, styles.headerText]}>Client ID</Text>
           <Text style={[styles.clientText, styles.headerText]}>Last Name</Text>
-          <Text style={[styles.clientText, styles.headerText]}>First Name</Text>
           <Text style={[styles.clientText, styles.headerText]}>Pendings</Text>
           <Text style={[styles.clientText, styles.headerText]}>Company</Text>
         </View>
@@ -228,15 +224,17 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingTop: 50,
     paddingBottom: 20,
+    paddingHorizontal: 16,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
   backButton: {
     paddingVertical: 8,
-    marginLeft: 16,
+    paddingHorizontal: 8,
   },
   headerTitle: {
     fontSize: 24,
@@ -244,6 +242,17 @@ const styles = StyleSheet.create({
     color: "#333",
     flex: 1,
     textAlign: "center",
+  },
+  createButton: {
+    backgroundColor: "#28a745",
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  createButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
   controlsContainer: {
     flexDirection: "row",
@@ -257,32 +266,12 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     borderRadius: 4,
     width: 200,
-    height: "100%",
-    marginRight: 10,
   },
   picker: {
     width: "100%",
-    height: "100%",
   },
   pickerItem: {
     fontSize: 14,
-  },
-  buttonContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    flexDirection: "row",
-  },
-  createButton: {
-    backgroundColor: "#28a745",
-    borderRadius: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
   },
   tableContainer: {
     backgroundColor: "#fff",
@@ -302,7 +291,7 @@ const styles = StyleSheet.create({
   clientText: {
     flex: 1,
     textAlign: "center",
-    fontSize: 14,
+    fontSize: 15,
     color: "#333",
   },
   headerText: {
