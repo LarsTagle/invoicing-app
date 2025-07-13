@@ -13,6 +13,7 @@ import { getClients } from "../database/db";
 export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
   const [deletedClientIds, setDeletedClientIds] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState(null); // Track selected client
 
   // Load deleted client IDs from AsyncStorage
   const loadDeletedClientIds = async () => {
@@ -77,6 +78,7 @@ export default function ManageClients({ navigation }) {
             setClients((prevClients) =>
               prevClients.filter((client) => client.id !== id)
             );
+            setSelectedClientId(null); // Hide buttons after delete
             Alert.alert("Success", "Client removed from the list.");
           },
         },
@@ -84,39 +86,51 @@ export default function ManageClients({ navigation }) {
     );
   };
 
-  // Handle View button (placeholder)
+  // Handle View button
   const handleView = (client) => {
     navigation.navigate("ViewClients", { client });
   };
 
+  // Handle row click to toggle action buttons
+  const handleRowClick = (id) => {
+    setSelectedClientId((prev) => (prev === id ? null : id)); // Toggle selection
+  };
+
   // Render client item
   const renderClientItem = ({ item }) => (
-    <View style={styles.clientRow}>
-      <Text style={styles.clientText}>{item.client_id}</Text>
-      <Text style={styles.clientText}>{item.first_name}</Text>
-      <Text style={styles.clientText}>{item.last_name}</Text>
-      <View style={styles.actionColumn}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.viewButton]}
-          onPress={() => handleView(item)}
-        >
-          <Text style={styles.actionButtonText}>View</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.editButton]}
-          onPress={() => navigation.navigate("EditClient", { client: item })}
-        >
-          <Text style={styles.actionButtonText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.deleteButton]}
-          onPress={() =>
-            handleDelete(item.id, `${item.first_name} ${item.last_name}`)
-          }
-        >
-          <Text style={styles.actionButtonText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
+    <View>
+      <TouchableOpacity
+        style={styles.clientRow}
+        onPress={() => handleRowClick(item.id)}
+      >
+        <Text style={styles.clientText}>{item.client_id}</Text>
+        <Text style={styles.clientText}>{item.first_name}</Text>
+        <Text style={styles.clientText}>{item.last_name}</Text>
+      </TouchableOpacity>
+      {selectedClientId === item.id && (
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.viewButton]}
+            onPress={() => handleView(item)}
+          >
+            <Text style={styles.actionButtonText}>View</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.editButton]}
+            onPress={() => navigation.navigate("EditClient", { client: item })}
+          >
+            <Text style={styles.actionButtonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.deleteButton]}
+            onPress={() =>
+              handleDelete(item.id, `${item.first_name} ${item.last_name}`)
+            }
+          >
+            <Text style={styles.actionButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 
@@ -147,7 +161,6 @@ export default function ManageClients({ navigation }) {
           <Text style={[styles.clientText, styles.headerText]}>Client ID</Text>
           <Text style={[styles.clientText, styles.headerText]}>First Name</Text>
           <Text style={[styles.clientText, styles.headerText]}>Last Name</Text>
-          <Text style={[styles.clientText, styles.headerText]}>Actions</Text>
         </View>
         <FlatList
           data={clients}
@@ -246,17 +259,18 @@ const styles = StyleSheet.create({
   headerText: {
     fontWeight: "bold",
   },
-  actionColumn: {
-    flex: 1,
-    flexDirection: "column",
+  actionButtons: {
+    flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 8,
   },
   actionButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    marginVertical: 2,
-    width: 60, // Fixed width for consistent button size
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginHorizontal: 8,
+    borderRadius: 4,
   },
   viewButton: {
     backgroundColor: "#007bff",
@@ -269,7 +283,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
     textAlign: "center",
   },
