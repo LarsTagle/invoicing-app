@@ -224,7 +224,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    padding: 16,
   },
   header: {
     flexDirection: "row",
@@ -237,7 +236,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    marginLeft: 16,
   },
   headerTitle: {
     fontSize: 24,
@@ -249,8 +248,8 @@ const styles = StyleSheet.create({
   controlsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-    marginTop: 10,
+    marginHorizontal: 16,
+    marginVertical: 10,
   },
   pickerContainer: {
     backgroundColor: "#fff",
@@ -258,10 +257,12 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     borderRadius: 4,
     width: 200,
+    height: "100%",
     marginRight: 10,
   },
   picker: {
     width: "100%",
+    height: "100%",
   },
   pickerItem: {
     fontSize: 14,
@@ -288,7 +289,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 4,
-    padding: 8,
+    paddingTop: 8,
+    margin: 10,
   },
   clientRow: {
     flexDirection: "row",

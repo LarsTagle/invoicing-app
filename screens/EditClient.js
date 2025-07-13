@@ -54,7 +54,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    padding: 16,
   },
   header: {
     flexDirection: "row",
@@ -67,7 +66,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    marginLeft: 16,
   },
   headerTitle: {
     fontSize: 24,

@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    marginLeft: 16,
   },
   headerTitle: {
     fontSize: 24,

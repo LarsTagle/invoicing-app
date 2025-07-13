@@ -150,6 +150,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 4,
     marginBottom: 16,
+    marginTop: 10,
+    marginHorizontal: 16,
     borderWidth: 1,
     borderColor: "#ccc",
   },
@@ -166,6 +168,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flex: 1,
     marginRight: 8,
+    backgroundColor: "red",
   },
   input: {
     borderWidth: 1,
