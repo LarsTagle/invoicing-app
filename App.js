@@ -7,6 +7,7 @@ import LandingPage from "./screens/LandingPage";
 import ManageClients from "./screens/ManageClients";
 import CreateClient from "./screens/CreateClient";
 import EditClient from "./screens/EditClient";
+import ViewClients from "./screens/ViewClients";
 import { initializeDatabase } from "./database/db";
 
 const Stack = createStackNavigator();
@@ -47,6 +48,11 @@ export default function App() {
         <Stack.Screen
           name="EditClient"
           component={EditClient}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ViewClients"
+          component={ViewClients}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

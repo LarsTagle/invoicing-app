@@ -84,16 +84,24 @@ export default function ManageClients({ navigation }) {
     );
   };
 
+  // Handle View button (placeholder)
+  const handleView = (client) => {
+    navigation.navigate("ViewClients", { client });
+  };
+
   // Render client item
   const renderClientItem = ({ item }) => (
     <View style={styles.clientRow}>
       <Text style={styles.clientText}>{item.client_id}</Text>
       <Text style={styles.clientText}>{item.first_name}</Text>
       <Text style={styles.clientText}>{item.last_name}</Text>
-      <Text style={styles.clientText}>{item.email || "-"}</Text>
-      <Text style={styles.clientText}>{item.phone || "-"}</Text>
-      <Text style={styles.clientText}>{item.company_name || "-"}</Text>
       <View style={styles.actionColumn}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.viewButton]}
+          onPress={() => handleView(item)}
+        >
+          <Text style={styles.actionButtonText}>View</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.editButton]}
           onPress={() => navigation.navigate("EditClient", { client: item })}
@@ -139,9 +147,6 @@ export default function ManageClients({ navigation }) {
           <Text style={[styles.clientText, styles.headerText]}>Client ID</Text>
           <Text style={[styles.clientText, styles.headerText]}>First Name</Text>
           <Text style={[styles.clientText, styles.headerText]}>Last Name</Text>
-          <Text style={[styles.clientText, styles.headerText]}>Email</Text>
-          <Text style={[styles.clientText, styles.headerText]}>Phone</Text>
-          <Text style={[styles.clientText, styles.headerText]}>Company</Text>
           <Text style={[styles.clientText, styles.headerText]}>Actions</Text>
         </View>
         <FlatList
@@ -251,6 +256,10 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     marginVertical: 2,
+    width: 60, // Fixed width for consistent button size
+  },
+  viewButton: {
+    backgroundColor: "#007bff",
   },
   editButton: {
     backgroundColor: "#28a745",
