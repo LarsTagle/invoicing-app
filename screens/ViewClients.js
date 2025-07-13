@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { getInvoices } from "../database/db";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ViewClients({ navigation, route }) {
   const { client } = route.params;
@@ -30,7 +31,7 @@ export default function ViewClients({ navigation, route }) {
           style={styles.backButton}
           onPress={() => navigation.navigate("ManageClients")}
         >
-          <Text style={styles.backButtonText}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#007bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Client Details</Text>
       </View>
@@ -72,11 +73,6 @@ const styles = StyleSheet.create({
   backButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-  },
-  backButtonText: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#007bff",
   },
   headerTitle: {
     fontSize: 24,

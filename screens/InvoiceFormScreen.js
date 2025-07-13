@@ -16,6 +16,7 @@ import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { insertInvoice, insertItem, getClients } from "../database/db";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function InvoiceFormScreen({ navigation }) {
   const [clients, setClients] = useState([]);
@@ -244,8 +245,11 @@ export default function InvoiceFormScreen({ navigation }) {
       keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleCancel}>
-          <Text style={styles.backButtonText}>←</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("InvoiceList")}
+        >
+          <Ionicons name="arrow-back" size={24} color="#007bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Invoice</Text>
       </View>
@@ -495,11 +499,6 @@ const styles = StyleSheet.create({
   backButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-  },
-  backButtonText: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#007bff",
   },
   headerTitle: {
     fontSize: 24,

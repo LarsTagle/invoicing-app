@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getClients, getInvoices } from "../database/db";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ManageClients({ navigation }) {
   const [clients, setClients] = useState([]);
@@ -152,7 +153,7 @@ export default function ManageClients({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.navigate("LandingPage")}
         >
-          <Text style={styles.backButtonText}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#007bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Clients</Text>
       </View>
@@ -208,11 +209,6 @@ const styles = StyleSheet.create({
   backButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-  },
-  backButtonText: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#007bff",
   },
   headerTitle: {
     fontSize: 24,

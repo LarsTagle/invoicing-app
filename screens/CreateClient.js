@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import ClientForm from "../components/ClientForm";
 import { insertClient } from "../database/db";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CreateClient({ navigation }) {
   const handleSubmit = async (client) => {
@@ -32,7 +33,7 @@ export default function CreateClient({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.navigate("ManageClients")}
         >
-          <Text style={styles.backButtonText}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#007bff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Client</Text>
       </View>
@@ -59,11 +60,6 @@ const styles = StyleSheet.create({
   backButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-  },
-  backButtonText: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#007bff",
   },
   headerTitle: {
     fontSize: 24,
