@@ -276,10 +276,8 @@ export default function InvoiceFormScreen({ navigation }) {
               />
             ))}
           </Picker>
-          {errors.client ? (
+          {errors.client && (
             <Text style={styles.errorText}>{errors.client}</Text>
-          ) : (
-            <Text style={[styles.errorText, styles.placeholder]}> </Text>
           )}
         </View>
         {selectedClientId && (
@@ -336,10 +334,8 @@ export default function InvoiceFormScreen({ navigation }) {
                 }}
               />
             )}
-            {errors.issueDate ? (
+            {errors.issueDate && (
               <Text style={styles.errorText}>{errors.issueDate}</Text>
-            ) : (
-              <Text style={[styles.errorText, styles.placeholder]}> </Text>
             )}
           </View>
           <View style={styles.halfContainer}>
@@ -367,15 +363,13 @@ export default function InvoiceFormScreen({ navigation }) {
                 }}
               />
             )}
-            {errors.dueDate ? (
+            {errors.dueDate && (
               <Text style={styles.errorText}>{errors.dueDate}</Text>
-            ) : (
-              <Text style={[styles.errorText, styles.placeholder]}> </Text>
             )}
           </View>
         </View>
         <Text style={styles.label}>Add Item</Text>
-        <View>
+        <View style={styles.inputContainer}>
           <TextInput
             key="itemName"
             style={styles.input}
@@ -389,10 +383,8 @@ export default function InvoiceFormScreen({ navigation }) {
             }}
             placeholder="Item name"
           />
-          {errors.itemName ? (
+          {errors.itemName && (
             <Text style={styles.errorText}>{errors.itemName}</Text>
-          ) : (
-            <Text style={[styles.errorText, styles.placeholder]}> </Text>
           )}
         </View>
         <View style={styles.row}>
@@ -412,10 +404,8 @@ export default function InvoiceFormScreen({ navigation }) {
               placeholder="Quantity"
               keyboardType="numeric"
             />
-            {errors.itemQuantity ? (
+            {errors.itemQuantity && (
               <Text style={styles.errorText}>{errors.itemQuantity}</Text>
-            ) : (
-              <Text style={[styles.errorText, styles.placeholder]}> </Text>
             )}
           </View>
           <View style={styles.halfInputContainer}>
@@ -434,10 +424,8 @@ export default function InvoiceFormScreen({ navigation }) {
               placeholder="Unit price"
               keyboardType="numeric"
             />
-            {errors.itemPrice ? (
+            {errors.itemPrice && (
               <Text style={styles.errorText}>{errors.itemPrice}</Text>
-            ) : (
-              <Text style={[styles.errorText, styles.placeholder]}> </Text>
             )}
           </View>
         </View>
@@ -488,7 +476,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "flex-start",
+    // justifyContent: "flex-start",
     alignItems: "center",
     padding: 16,
     paddingTop: 50,
@@ -504,6 +492,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
+    flex: 1,
+    textAlign: "center",
   },
   scrollContent: {
     padding: 16,
@@ -520,12 +510,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
   },
+  inputContainer: {
+    marginBottom: 12, // Reserve space for error messages
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 4,
     padding: 8,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   halfInput: {
     flex: 1,
@@ -536,6 +529,7 @@ const styles = StyleSheet.create({
   halfInputContainer: {
     flex: 1,
     marginRight: 8,
+    marginBottom: 12, // Reserve space for error messages
   },
   row: {
     flexDirection: "row",
@@ -552,17 +546,19 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 4,
     padding: 8,
-    marginBottom: 8,
+    marginBottom: 12, // Reserve space for error messages
   },
   pickerContainer: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 4,
-    marginBottom: 8,
+    marginBottom: 12, // Reserve space for error messages
     backgroundColor: "#fff",
+    height: 30,
   },
   picker: {
     width: "100%",
+    height: "100%",
   },
   itemsHeader: {
     flexDirection: "row",
@@ -617,10 +613,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 12,
-    minHeight: 18,
-  },
-  placeholder: {
-    color: "transparent",
   },
   clientDetails: {
     marginBottom: 8,

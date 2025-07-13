@@ -73,10 +73,8 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
             }}
             placeholder="First Name"
           />
-          {errors.firstName ? (
+          {errors.firstName && (
             <Text style={styles.errorText}>{errors.firstName}</Text>
-          ) : (
-            <Text style={[styles.errorText, styles.placeholder]}> </Text>
           )}
         </View>
         <View style={styles.inputContainer}>
@@ -89,50 +87,45 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
             }}
             placeholder="Last Name"
           />
-          {errors.lastName ? (
+          {errors.lastName && (
             <Text style={styles.errorText}>{errors.lastName}</Text>
-          ) : (
-            <Text style={[styles.errorText, styles.placeholder]}> </Text>
           )}
         </View>
       </View>
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={(text) => {
-          setEmail(text);
-          setErrors((prev) => ({ ...prev, email: validateEmail(text) }));
-        }}
-        placeholder="Email (optional)"
-        keyboardType="email-address"
-      />
-      {errors.email ? (
-        <Text style={styles.errorText}>{errors.email}</Text>
-      ) : (
-        <Text style={[styles.errorText, styles.placeholder]}> </Text>
-      )}
-      <TextInput
-        style={styles.input}
-        value={phone}
-        onChangeText={(text) => {
-          setPhone(text);
-          setErrors((prev) => ({ ...prev, phone: validatePhone(text) }));
-        }}
-        placeholder="Phone (optional)"
-        keyboardType="phone-pad"
-      />
-      {errors.phone ? (
-        <Text style={styles.errorText}>{errors.phone}</Text>
-      ) : (
-        <Text style={[styles.errorText, styles.placeholder]}> </Text>
-      )}
-      <TextInput
-        style={styles.input}
-        value={companyName}
-        onChangeText={setCompanyName}
-        placeholder="Company Name (optional)"
-      />
-      <Text style={[styles.errorText, styles.placeholder]}> </Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            setErrors((prev) => ({ ...prev, email: validateEmail(text) }));
+          }}
+          placeholder="Email (optional)"
+          keyboardType="email-address"
+        />
+        {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+      </View>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={phone}
+          onChangeText={(text) => {
+            setPhone(text);
+            setErrors((prev) => ({ ...prev, phone: validatePhone(text) }));
+          }}
+          placeholder="Phone (optional)"
+          keyboardType="phone-pad"
+        />
+        {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+      </View>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={companyName}
+          onChangeText={setCompanyName}
+          placeholder="Company Name (optional)"
+        />
+      </View>
       <View style={styles.buttonRow}>
         <Button title="Cancel" onPress={onCancel} color="#dc3545" />
         <Button
@@ -168,7 +161,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flex: 1,
     marginRight: 8,
-    backgroundColor: "red",
+    marginBottom: 12, // Reserve space for error messages
   },
   input: {
     borderWidth: 1,
@@ -180,10 +173,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 12,
-    minHeight: 18,
-  },
-  placeholder: {
-    color: "transparent",
   },
   buttonRow: {
     flexDirection: "row",
