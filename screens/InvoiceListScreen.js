@@ -11,6 +11,7 @@ import { Picker } from "@react-native-picker/picker";
 import InvoiceItemCard from "../components/InvoiceItemCard";
 import { getInvoices } from "../database/db";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function InvoiceListScreen({ navigation }) {
   const [invoices, setInvoices] = useState([]);
@@ -18,11 +19,26 @@ export default function InvoiceListScreen({ navigation }) {
   const [sortField, setSortField] = useState("id");
   const [statusFilter, setStatusFilter] = useState("All");
 
+  const loadDeletedInvoiceIds = async () => {
+    try {
+      const stored = await AsyncStorage.getItem("deletedInvoices");
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error("Failed to load deleted invoice IDs:", error);
+      return [];
+    }
+  };
+
   const fetchInvoices = async () => {
     try {
       const data = await getInvoices();
+      const deletedIds = await loadDeletedInvoiceIds();
       const validInvoices = data.filter(
-        (invoice) => invoice && invoice.id && invoice.total != null
+        (invoice) =>
+          !deletedIds.includes(invoice.id) &&
+          invoice &&
+          invoice.id &&
+          invoice.total != null
       );
       setInvoices(validInvoices);
     } catch (error) {

@@ -1,8 +1,28 @@
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import { updateInvoiceStatus } from "../database/db";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function InvoiceItemCard({ invoice, onStatusUpdate }) {
+  const loadDeletedInvoiceIds = async () => {
+    try {
+      const stored = await AsyncStorage.getItem("deletedInvoices");
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error("Failed to load deleted invoice IDs:", error);
+      return [];
+    }
+  };
+
+  const saveDeletedInvoiceIds = async (ids) => {
+    try {
+      await AsyncStorage.setItem("deletedInvoices", JSON.stringify(ids));
+    } catch (error) {
+      console.error("Failed to save deleted invoice IDs:", error);
+    }
+  };
+
   const handleStatusToggle = async () => {
     try {
       const newStatus = invoice.status === "Paid" ? "Unpaid" : "Paid";
@@ -10,7 +30,40 @@ export default function InvoiceItemCard({ invoice, onStatusUpdate }) {
       onStatusUpdate(); // Refresh the list
     } catch (error) {
       console.error("Failed to update status:", error);
+      Alert.alert(
+        "Error",
+        "Failed to update invoice status. Please try again."
+      );
     }
+  };
+
+  const handleDelete = async () => {
+    Alert.alert(
+      "Delete Invoice",
+      `Are you sure you want to delete Invoice #${invoice.id}? This will remove the invoice from the list.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const deletedIds = await loadDeletedInvoiceIds();
+              const newDeletedIds = [...deletedIds, invoice.id];
+              await saveDeletedInvoiceIds(newDeletedIds);
+              onStatusUpdate(); // Refresh the list
+              Alert.alert("Success", "Invoice removed from the list.");
+            } catch (error) {
+              console.error("Failed to delete invoice:", error);
+              Alert.alert(
+                "Error",
+                "Failed to remove invoice. Please try again."
+              );
+            }
+          },
+        },
+      ]
+    );
   };
 
   // Ensure total is a number and format to 2 decimal places
@@ -45,11 +98,21 @@ export default function InvoiceItemCard({ invoice, onStatusUpdate }) {
         <Text style={styles.label}>Total:</Text>
         <Text style={styles.value}>${formattedTotal}</Text>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleStatusToggle}>
-        <Text style={styles.buttonText}>
-          Mark as {invoice.status === "Paid" ? "Unpaid" : "Paid"}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.statusButton}
+          onPress={handleStatusToggle}
+        >
+          <Text style={styles.buttonText}>
+            Mark as {invoice.status === "Paid" ? "Unpaid" : "Paid"}
+          </Text>
+        </TouchableOpacity>
+        {invoice.status === "Paid" && (
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Ionicons name="trash-outline" size={20} color="#fff" />
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -106,12 +169,26 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#333",
   },
-  button: {
+  buttonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  statusButton: {
     backgroundColor: "#007bff",
     borderRadius: 4,
     padding: 12,
+    flex: 1,
     alignItems: "center",
-    marginTop: 12,
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    borderRadius: 4,
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
   },
   buttonText: {
     color: "#fff",
