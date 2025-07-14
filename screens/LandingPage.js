@@ -3,21 +3,10 @@ import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function LandingPage({ navigation }) {
-  const handleInfoPress = () => {
-    Alert.alert(
-      "About InvoicePro",
-      "InvoicePro is your professional invoicing solution for managing invoices and clients efficiently.",
-      [{ text: "OK" }]
-    );
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>InvoicePro</Text>
-        <TouchableOpacity style={styles.infoButton} onPress={handleInfoPress}>
-          <Ionicons name="information-circle" size={24} color="#333" />
-        </TouchableOpacity>
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -47,8 +36,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 50,
-    paddingBottom: 20,
+    paddingTop: 150,
+    // paddingBottom: 20,
   },
   title: {
     fontSize: 36,
@@ -56,9 +45,6 @@ const styles = StyleSheet.create({
     color: "#28a745",
     textAlign: "center",
     flex: 1,
-  },
-  infoButton: {
-    padding: 10,
   },
   buttonContainer: {
     flex: 1,

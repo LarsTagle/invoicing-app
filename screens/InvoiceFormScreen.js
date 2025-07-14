@@ -553,11 +553,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 12, // Reserve space for error messages
     backgroundColor: "#fff",
-    height: 30,
   },
   picker: {
     width: "100%",
-    height: "100%",
   },
   itemsHeader: {
     flexDirection: "row",

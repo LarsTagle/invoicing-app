@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     borderRadius: 4,
     width: 200,
-    marginRight: 10,
+    marginHorizontal: 10,
   },
   picker: {
     width: "100%",
