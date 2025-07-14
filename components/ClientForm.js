@@ -63,7 +63,7 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
     <View style={styles.formContainer}>
       <Text style={styles.label}>Client Details</Text>
       <View style={styles.row}>
-        <View style={[styles.inputContainer, styles.rowInputContainer]}>
+        <View style={[styles.inputContainer, styles.rowInputContainerLeft]}>
           <TextInput
             style={styles.input}
             value={firstName}
@@ -77,7 +77,7 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
             <Text style={styles.errorText}>{errors.firstName}</Text>
           )}
         </View>
-        <View style={[styles.inputContainer, styles.rowInputContainer]}>
+        <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
             value={lastName}
@@ -92,7 +92,7 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
           )}
         </View>
       </View>
-      <View style={styles.inputContainer}>
+      <View>
         <TextInput
           style={styles.input}
           value={email}
@@ -105,7 +105,7 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
         />
         {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
       </View>
-      <View style={styles.inputContainer}>
+      <View>
         <TextInput
           style={styles.input}
           value={phone}
@@ -118,7 +118,7 @@ export default function ClientForm({ initialClient, onSubmit, onCancel }) {
         />
         {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
       </View>
-      <View style={styles.inputContainer}>
+      <View>
         <TextInput
           style={styles.input}
           value={companyName}
@@ -156,15 +156,15 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between", // Ensures even spacing for First Name and Last Name
-    marginBottom: 16, // Increased for vertical spacing
+    // marginBottom: 16, // Increased for vertical spacing
   },
   inputContainer: {
     flex: 1, // Ensures inputs take available space
-    marginBottom: 16, // Increased to account for removed placeholder space
+    // marginBottom: 16, // Increased to account for removed placeholder space
     width: "100%", // Ensures full width for non-row inputs
   },
-  rowInputContainer: {
-    marginRight: 12, // Increased for space between First Name and Last Name
+  rowInputContainerLeft: {
+    marginRight: 8, // Increased for space between First Name and Last Name
   },
   input: {
     borderWidth: 1,
@@ -172,8 +172,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 12, // Increased for better internal spacing
     marginBottom: 8, // Increased for space below input
-    height: 40, // Explicit height for consistent sizing
-    width: "100%", // Ensures full width for all inputs
+    // height: 40, // Explicit height for consistent sizing
+    // width: "100%", // Ensures full width for all inputs
   },
   errorText: {
     color: "red",

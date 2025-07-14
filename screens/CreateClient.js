@@ -37,11 +37,7 @@ export default function CreateClient({ navigation }) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Client</Text>
       </View>
-      <ClientForm
-        key={Date.now()} // Force remount to prevent compression
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-      />
+      <ClientForm onSubmit={handleSubmit} onCancel={handleCancel} />
     </View>
   );
 }
@@ -56,7 +52,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 50,
     paddingBottom: 20,
-    paddingHorizontal: 16,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
