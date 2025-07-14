@@ -1,8 +1,18 @@
 import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LandingPage({ navigation }) {
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("isLoggedIn");
+      navigation.replace("Login"); // Replace to prevent going back to LandingPage
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -21,6 +31,9 @@ export default function LandingPage({ navigation }) {
         >
           <Text style={styles.buttonText}>Clients</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -37,7 +50,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingTop: 150,
-    // paddingBottom: 20,
   },
   title: {
     fontSize: 36,
@@ -63,6 +75,19 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 18,
+    fontWeight: "600",
+  },
+  logoutButton: {
+    backgroundColor: "#dc3545",
+    borderRadius: 4,
+    padding: 12,
+    marginTop: 16,
+    width: "80%",
+    alignItems: "center",
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "600",
   },
 });
