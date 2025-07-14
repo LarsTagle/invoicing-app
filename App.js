@@ -27,6 +27,7 @@ export default function App() {
           //   try {
           //     // Clear AsyncStorage for deletedClients
           //     await AsyncStorage.removeItem("deletedClients");
+          //     await AsyncStorage.removeItem("deletedInvoices");
           //     // Clear and reinitialize the database
           //     await clearDatabase();
           //     await initializeDatabase();
