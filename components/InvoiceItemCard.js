@@ -66,6 +66,10 @@ export default function InvoiceItemCard({ invoice, onStatusUpdate }) {
     );
   };
 
+  // Check if invoice is overdue
+  const isOverdue =
+    invoice.status === "Unpaid" && new Date(invoice.due_date) < new Date();
+
   // Ensure total is a number and format to 2 decimal places
   const formattedTotal =
     invoice.total != null ? Number(invoice.total).toFixed(2) : "0.00";
@@ -77,14 +81,21 @@ export default function InvoiceItemCard({ invoice, onStatusUpdate }) {
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.invoiceNumber}>Invoice #{invoice.id}</Text>
-        <Text
-          style={[
-            styles.status,
-            invoice.status === "Paid" ? styles.statusPaid : styles.statusUnpaid,
-          ]}
-        >
-          {invoice.status}
-        </Text>
+        <View style={styles.statusContainer}>
+          {isOverdue && (
+            <Text style={[styles.status, styles.statusOverdue]}>Overdue</Text>
+          )}
+          <Text
+            style={[
+              styles.status,
+              invoice.status === "Paid"
+                ? styles.statusPaid
+                : styles.statusUnpaid,
+            ]}
+          >
+            {invoice.status}
+          </Text>
+        </View>
       </View>
       <View style={styles.details}>
         <Text style={styles.label}>Client:</Text>
@@ -140,12 +151,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   status: {
     fontSize: 14,
     fontWeight: "600",
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 4,
+    marginLeft: 8,
   },
   statusPaid: {
     backgroundColor: "#e6ffed",
@@ -154,6 +170,10 @@ const styles = StyleSheet.create({
   statusUnpaid: {
     backgroundColor: "#ffe6e6",
     color: "#dc3545",
+  },
+  statusOverdue: {
+    backgroundColor: "#fff3e0",
+    color: "#ff851b",
   },
   details: {
     flexDirection: "row",

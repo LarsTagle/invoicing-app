@@ -58,13 +58,26 @@ export default function InvoiceListScreen({ navigation }) {
 
   const toggleStatusFilter = () => {
     setStatusFilter((prev) =>
-      prev === "All" ? "Paid" : prev === "Paid" ? "Unpaid" : "All"
+      prev === "All"
+        ? "Paid"
+        : prev === "Paid"
+        ? "Unpaid"
+        : prev === "Unpaid"
+        ? "Overdue"
+        : "All"
     );
   };
 
-  const filteredInvoices = invoices.filter((invoice) =>
-    statusFilter === "All" ? true : invoice.status === statusFilter
-  );
+  const filteredInvoices = invoices.filter((invoice) => {
+    if (statusFilter === "All") return true;
+    if (statusFilter === "Paid") return invoice.status === "Paid";
+    if (statusFilter === "Unpaid") return invoice.status === "Unpaid";
+    if (statusFilter === "Overdue")
+      return (
+        invoice.status === "Unpaid" && new Date(invoice.due_date) < new Date()
+      );
+    return true;
+  });
 
   const sortedInvoices = [...filteredInvoices].sort((a, b) => {
     switch (sortField) {
@@ -96,6 +109,9 @@ export default function InvoiceListScreen({ navigation }) {
         break;
       case "Unpaid":
         message = "All invoice paid!";
+        break;
+      case "Overdue":
+        message = "No overdue invoices found.";
         break;
       default:
         message = "No invoices found. Create one!";
