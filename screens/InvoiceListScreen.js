@@ -85,11 +85,27 @@ export default function InvoiceListScreen({ navigation }) {
     }
   });
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>No invoices found. Create one!</Text>
-    </View>
-  );
+  const renderEmptyState = () => {
+    let message;
+    switch (statusFilter) {
+      case "All":
+        message = "No invoices found. Create one!";
+        break;
+      case "Paid":
+        message = "No paid invoice found.";
+        break;
+      case "Unpaid":
+        message = "All invoice paid!";
+        break;
+      default:
+        message = "No invoices found. Create one!";
+    }
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>{message}</Text>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
